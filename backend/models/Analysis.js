@@ -29,6 +29,16 @@ const analysisSchema = new mongoose.Schema(
       default: "",
     },
 
+    keyPoints: {
+      type: [String],
+      default: [],
+    },
+
+    actionItems: {
+      type: [String],
+      default: [],
+    },
+
     status: {
       type: String,
       enum: ["PROCESSING", "COMPLETED"],
