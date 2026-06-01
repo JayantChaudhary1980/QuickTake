@@ -10,22 +10,59 @@ export async function getHealth() {
   return response.json();
 }
 
-export async function uploadAnalysis({ title, file }) {
+function getAuthHeaders() {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    throw new Error("You must be logged in to upload.");
+    throw new Error("You must be logged in.");
   }
 
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+export async function getAnalysisById(id) {
+  const response = await fetch(`${API_BASE_URL}/api/analyses/${id}`, {
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch analysis");
+  }
+
+  return data;
+}
+
+export async function askAnalysis(id, question) {
+  const response = await fetch(`${API_BASE_URL}/api/analyses/${id}/ask`, {
+    method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ question }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to get answer");
+  }
+
+  return data;
+}
+
+export async function uploadAnalysis({ title, file }) {
   const formData = new FormData();
   formData.append("title", title);
   formData.append("file", file);
 
   const response = await fetch(`${API_BASE_URL}/api/analyses/upload`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
     body: formData,
   });
 

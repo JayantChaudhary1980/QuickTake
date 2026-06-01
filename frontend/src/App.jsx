@@ -3,6 +3,7 @@ import AdminPage from "./pages/AdminPage";
 import DashboardPage from "./pages/DashBoardPage";
 import LandingPage from "./pages/LandingPage";
 import UploadPage from "./pages/UploadPage";
+import AnalysisDetailsPage from "./pages/AnalysisDetailsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -28,6 +29,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UploadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analysis/:id"
+          element={
+            <ProtectedRoute>
+              <AnalysisDetailsPage />
             </ProtectedRoute>
           }
         />

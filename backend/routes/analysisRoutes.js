@@ -1,7 +1,9 @@
 import express from "express";
 import {
+  askAnalysis,
   createAnalysis,
   getAnalyses,
+  getAnalysisById,
   uploadAnalysis,
 } from "../controllers/analysisController.js";
 import protect from "../middleware/authMiddleware.js";
@@ -23,5 +25,9 @@ router.post("/upload", protect, uploadSingle, uploadAnalysis);
 router.post("/", protect, createAnalysis);
 
 router.get("/", protect, getAnalyses);
+
+router.post("/:id/ask", protect, askAnalysis);
+
+router.get("/:id", protect, getAnalysisById);
 
 export default router;

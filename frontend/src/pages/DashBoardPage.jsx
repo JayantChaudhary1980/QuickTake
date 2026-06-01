@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Clock,
   History,
@@ -250,29 +251,33 @@ function DashboardPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 {analyses.map((analysis) => (
-                  <Card
+                  <Link
                     key={analysis._id}
-                    className="cursor-pointer border-border/60 transition-colors hover:border-violet-500/30 hover:bg-card"
+                    to={`/analysis/${analysis._id}`}
+                    className="block"
                   >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <CardTitle className="text-base">{analysis.title}</CardTitle>
-                        <StatusBadge
+                    <Card className="h-full cursor-pointer border-border/60 transition-colors hover:border-violet-500/30 hover:bg-card">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <CardTitle className="text-base">
+                            {analysis.title}
+                          </CardTitle>
+                          <StatusBadge
                             status={
-                                analysis.status === "COMPLETED"
+                              analysis.status === "COMPLETED"
                                 ? "Complete"
                                 : "Processing"
                             }
-                        />
-                      </div>
-                      <CardDescription>{analysis.sourceType}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="size-3.5 shrink-0" />
-                      {new Date(
-                        analysis.createdAt).toLocaleString()}
-                    </CardContent>
-                  </Card>
+                          />
+                        </div>
+                        <CardDescription>{analysis.sourceType}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="size-3.5 shrink-0" />
+                        {new Date(analysis.createdAt).toLocaleString()}
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             </section>
