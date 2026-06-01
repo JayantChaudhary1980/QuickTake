@@ -72,6 +72,62 @@ function DashboardPage() {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [backendOk, setBackendOk] = useState(false);
+  const [analyses, setAnalyses] = useState([]);
+
+  const fetchAnalyses = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const response = await fetch(
+        "http://localhost:8000/api/analyses",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const data = await response.json();
+  
+      console.log("Analyses:", data);
+  
+      setAnalyses(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const createAnalysis = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const response = await fetch(
+        "http://localhost:8000/api/analyses",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: "My First Analysis",
+            sourceType: "UPLOAD",
+          }),
+        }
+      );
+  
+      const data = await response.json();
+  
+      console.log("Analysis Created:", data);
+
+      fetchAnalyses();
+  
+      alert("Analysis Created Successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create analysis");
+    }
+  };
 
   useEffect(() => {
     getHealth()
@@ -83,12 +139,17 @@ function DashboardPage() {
       .catch(() => {
         setBackendOk(false);
       });
+  
+    fetchAnalyses();
   }, []);
+
+  console.log("Analyses State:", analyses);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-card/30 md:flex">
         <SidebarContent
+          analyses={analyses}
           activeNav={activeNav}
           onNavChange={setActiveNav}
         />
@@ -112,6 +173,7 @@ function DashboardPage() {
                 <SheetTitle>Navigation</SheetTitle>
               </SheetHeader>
               <SidebarContent
+                analyses={analyses}
                 activeNav={activeNav}
                 onNavChange={(id) => {
                   setActiveNav(id);
@@ -164,28 +226,38 @@ function DashboardPage() {
                     Pick up where you left off or start something new
                   </p>
                 </div>
-                <Button className="hidden sm:inline-flex">
-                  <Plus className="size-4" />
-                  New Analysis
+                <Button
+                    className="hidden sm:inline-flex"
+                    onClick={createAnalysis}
+                >
+                    <Plus className="size-4" />
+                    New Analysis
                 </Button>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                {recentAnalyses.map((analysis) => (
+                {analyses.map((analysis) => (
                   <Card
-                    key={analysis.id}
+                    key={analysis._id}
                     className="cursor-pointer border-border/60 transition-colors hover:border-violet-500/30 hover:bg-card"
                   >
                     <CardHeader className="pb-2">
                       <div className="flex items-start justify-between gap-2">
                         <CardTitle className="text-base">{analysis.title}</CardTitle>
-                        <StatusBadge status={analysis.status} />
+                        <StatusBadge
+                            status={
+                                analysis.status === "COMPLETED"
+                                ? "Complete"
+                                : "Processing"
+                            }
+                        />
                       </div>
-                      <CardDescription>{analysis.type}</CardDescription>
+                      <CardDescription>{analysis.sourceType}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="size-3.5 shrink-0" />
-                      {analysis.time}
+                      {new Date(
+                        analysis.createdAt).toLocaleString()}
                     </CardContent>
                   </Card>
                 ))}
@@ -198,7 +270,7 @@ function DashboardPage() {
   );
 }
 
-function SidebarContent({ activeNav, onNavChange, className }) {
+function SidebarContent({ analyses, activeNav, onNavChange, className }) {
   return (
     <div className={cn("flex h-full flex-col", className)}>
       <div className="flex items-center gap-2 px-4 py-5">
@@ -244,15 +316,15 @@ function SidebarContent({ activeNav, onNavChange, className }) {
           Recent
         </p>
         <ul className="space-y-1 overflow-y-auto">
-          {recentAnalyses.slice(0, 3).map((analysis) => (
-            <li key={analysis.id}>
+          {analyses.slice(0, 3).map((analysis) => (
+            <li key={analysis._id}>
               <button
                 type="button"
                 className="w-full rounded-md px-2 py-2 text-left text-sm transition-colors hover:bg-muted/60"
               >
                 <p className="truncate font-medium">{analysis.title}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {analysis.time}
+                  {new Date(analysis.createdAt).toLocaleString()}
                 </p>
               </button>
             </li>
