@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import {
   Bot,
   FileText,
@@ -82,9 +83,37 @@ function LandingPage() {
 
           <div className="flex items-center gap-2">
             <ModeToggle />
-            <Button variant="outline" size="sm" asChild>
+            {/* <Button variant="outline" size="sm" asChild>
               <Link to="/dashboard">Login</Link>
-            </Button>
+            </Button> */}
+            <GoogleLogin
+                onSuccess={(credentialResponse) => {
+                    fetch("http://localhost:8000/api/auth/google", {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                          credential: credentialResponse.credential,
+                        }),
+                      })
+                        .then((res) => res.json())
+                        .then((data) => {
+                            localStorage.setItem("token", data.token);
+                            localStorage.setItem(
+                                "user",
+                                JSON.stringify(data.user)
+                              );
+                          
+                            console.log("User:", data.user);
+                            console.log("Token:", data.token);
+                          });
+
+                }}
+                onError={() => {
+                    console.log("Login Failed");
+                }}
+            />
           </div>
         </nav>
       </header>

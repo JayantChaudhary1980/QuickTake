@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Clock,
   History,
@@ -27,6 +27,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { getHealth } from "@/services/api";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -70,6 +71,19 @@ const recentAnalyses = [
 function DashboardPage() {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [backendOk, setBackendOk] = useState(false);
+
+  useEffect(() => {
+    getHealth()
+      .then((data) => {
+        if (data.status === "ok") {
+          setBackendOk(true);
+        }
+      })
+      .catch(() => {
+        setBackendOk(false);
+      });
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -128,6 +142,12 @@ function DashboardPage() {
 
         <main className="flex-1 overflow-auto p-4 md:p-6">
           <div className="mx-auto max-w-5xl space-y-6">
+            {backendOk && (
+              <p className="text-sm font-medium text-emerald-500">
+                Backend Status: OK
+              </p>
+            )}
+
             <div className="grid gap-4 sm:grid-cols-3">
               <StatCard label="Total analyses" value="24" />
               <StatCard label="This week" value="6" />
