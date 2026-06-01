@@ -4,6 +4,7 @@ import DashboardPage from "./pages/DashBoardPage";
 import LandingPage from "./pages/LandingPage";
 import UploadPage from "./pages/UploadPage";
 import AnalysisDetailsPage from "./pages/AnalysisDetailsPage";
+import LiveCapturePage from "./pages/LiveCapturePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -29,6 +30,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UploadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analysis/new/live"
+          element={
+            <ProtectedRoute>
+              <LiveCapturePage />
             </ProtectedRoute>
           }
         />

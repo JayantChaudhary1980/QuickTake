@@ -55,10 +55,11 @@ export async function askAnalysis(id, question) {
   return data;
 }
 
-export async function uploadAnalysis({ title, file }) {
+export async function uploadAnalysis({ title, file, sourceType = "UPLOAD" }) {
   const formData = new FormData();
   formData.append("title", title);
   formData.append("file", file);
+  formData.append("sourceType", sourceType);
 
   const response = await fetch(`${API_BASE_URL}/api/analyses/upload`, {
     method: "POST",

@@ -106,6 +106,7 @@ export const askAnalysis = async (req, res) => {
 export const uploadAnalysis = async (req, res) => {
   try {
     const title = req.body.title?.trim();
+    const sourceType = req.body.sourceType === "LIVE_CAPTURE" ? "LIVE_CAPTURE" : "UPLOAD";
 
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
@@ -126,13 +127,24 @@ export const uploadAnalysis = async (req, res) => {
 
     console.log("Transcript length:", transcript.length);
 
-    const { summary, keyPoints, actionItems } =
-      await generateSummary(transcript);
+    let summary = "";
+    let keyPoints = [];
+    let actionItems = [];
+
+    try {
+      // const result = await generateSummary(transcript);
+
+      // summary = result.summary;
+      // keyPoints = result.keyPoints;
+      // actionItems = result.actionItems;
+    } catch (error) {
+      console.log("Gemini unavailable, saving transcript only");
+    }
 
     const analysis = await Analysis.create({
       userId: req.user.userId,
       title,
-      sourceType: "UPLOAD",
+      sourceType,
       transcript,
       summary,
       keyPoints,
