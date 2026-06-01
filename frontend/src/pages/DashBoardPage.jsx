@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { ModeToggle } from "@/components/mode-toggle";
+import { NewAnalysisDialog } from "@/components/new-analysis-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,6 +74,7 @@ function DashboardPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [backendOk, setBackendOk] = useState(false);
   const [analyses, setAnalyses] = useState([]);
+  const [newAnalysisOpen, setNewAnalysisOpen] = useState(false);
 
   const fetchAnalyses = async () => {
     try {
@@ -147,11 +149,17 @@ function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
+      <NewAnalysisDialog
+        open={newAnalysisOpen}
+        onOpenChange={setNewAnalysisOpen}
+      />
+
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-card/30 md:flex">
         <SidebarContent
           analyses={analyses}
           activeNav={activeNav}
           onNavChange={setActiveNav}
+          onNewAnalysis={() => setNewAnalysisOpen(true)}
         />
       </aside>
 
@@ -179,6 +187,7 @@ function DashboardPage() {
                   setActiveNav(id);
                   setMobileOpen(false);
                 }}
+                onNewAnalysis={() => setNewAnalysisOpen(true)}
                 className="h-full"
               />
             </SheetContent>
@@ -195,7 +204,11 @@ function DashboardPage() {
 
           <div className="flex items-center gap-2">
             <ModeToggle />
-            <Button className="md:hidden" size="sm">
+            <Button
+              className="md:hidden"
+              size="sm"
+              onClick={() => setNewAnalysisOpen(true)}
+            >
               <Plus className="size-4" />
               New
             </Button>
@@ -227,11 +240,11 @@ function DashboardPage() {
                   </p>
                 </div>
                 <Button
-                    className="hidden sm:inline-flex"
-                    onClick={createAnalysis}
+                  className="hidden sm:inline-flex"
+                  onClick={() => setNewAnalysisOpen(true)}
                 >
-                    <Plus className="size-4" />
-                    New Analysis
+                  <Plus className="size-4" />
+                  New Analysis
                 </Button>
               </div>
 
@@ -270,7 +283,13 @@ function DashboardPage() {
   );
 }
 
-function SidebarContent({ analyses, activeNav, onNavChange, className }) {
+function SidebarContent({
+  analyses,
+  activeNav,
+  onNavChange,
+  onNewAnalysis,
+  className,
+}) {
   return (
     <div className={cn("flex h-full flex-col", className)}>
       <div className="flex items-center gap-2 px-4 py-5">
@@ -281,7 +300,11 @@ function SidebarContent({ analyses, activeNav, onNavChange, className }) {
       </div>
 
       <div className="px-3">
-        <Button className="w-full justify-start gap-2" size="lg">
+        <Button
+          className="w-full justify-start gap-2"
+          size="lg"
+          onClick={onNewAnalysis}
+        >
           <Plus className="size-4" />
           New Analysis
         </Button>
@@ -300,7 +323,13 @@ function SidebarContent({ analyses, activeNav, onNavChange, className }) {
                 "w-full justify-start gap-2 font-normal",
                 isActive && "bg-secondary"
               )}
-              onClick={() => onNavChange(item.id)}
+              onClick={() => {
+                if (item.id === "new-analysis") {
+                  onNewAnalysis();
+                } else {
+                  onNavChange(item.id);
+                }
+              }}
             >
               <Icon className="size-4 shrink-0" />
               {item.label}

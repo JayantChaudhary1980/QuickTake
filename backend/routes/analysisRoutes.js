@@ -1,16 +1,27 @@
-const express = require("express");
+import express from "express";
+import {
+  createAnalysis,
+  getAnalyses,
+  uploadAnalysis,
+} from "../controllers/analysisController.js";
+import protect from "../middleware/authMiddleware.js";
+import { handleUploadError, upload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-const {
-  createAnalysis,
-  getAnalyses,
-} = require("../controllers/analysisController");
+const uploadSingle = (req, res, next) => {
+  upload.single("file")(req, res, (err) => {
+    if (err) {
+      return handleUploadError(err, req, res, next);
+    }
+    next();
+  });
+};
 
-const protect = require("../middleware/authMiddleware");
+router.post("/upload", protect, uploadSingle, uploadAnalysis);
 
 router.post("/", protect, createAnalysis);
 
 router.get("/", protect, getAnalyses);
 
-module.exports = router;
+export default router;

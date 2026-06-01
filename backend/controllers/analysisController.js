@@ -1,8 +1,8 @@
-const Analysis = require("../models/Analysis");
+import Analysis from "../models/Analysis.js";
+import { transcribeAudio } from "../services/groqService.js";
 
-const createAnalysis = async (req, res) => {
+export const createAnalysis = async (req, res) => {
   try {
-    console.log(req.user);
     const analysis = await Analysis.create({
       userId: req.user.userId,
       title: req.body.title,
@@ -16,7 +16,7 @@ const createAnalysis = async (req, res) => {
   }
 };
 
-const getAnalyses = async (req, res) => {
+export const getAnalyses = async (req, res) => {
   try {
     const analyses = await Analysis.find({
       userId: req.user.userId,
@@ -29,7 +29,42 @@ const getAnalyses = async (req, res) => {
   }
 };
 
-module.exports = {
-  createAnalysis,
-  getAnalyses,
+export const uploadAnalysis = async (req, res) => {
+  try {
+    const title = req.body.title?.trim();
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    console.log("File received:", req.file.originalname);
+    console.log("Size:", req.file.size);
+
+    const transcript = await transcribeAudio(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype
+    );
+
+    console.log("Transcript length:", transcript.length);
+
+    const analysis = await Analysis.create({
+      userId: req.user.userId,
+      title,
+      sourceType: "UPLOAD",
+      transcript,
+      status: "COMPLETED",
+    });
+
+    res.status(201).json(analysis);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to upload and transcribe analysis",
+    });
+  }
 };

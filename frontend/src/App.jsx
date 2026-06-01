@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AdminPage from "./pages/AdminPage";
 import DashboardPage from "./pages/DashBoardPage";
 import LandingPage from "./pages/LandingPage";
+import UploadPage from "./pages/UploadPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -21,6 +22,14 @@ function App() {
             <AdminPage />
           </AdminRoute>
           } 
+        />
+        <Route
+          path="/analysis/new/upload"
+          element={
+            <ProtectedRoute>
+              <UploadPage />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </BrowserRouter>

@@ -1,10 +1,10 @@
-const { OAuth2Client } = require("google-auth-library");
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
+import { OAuth2Client } from "google-auth-library";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const googleLogin = async (req, res) => {
+export const googleLogin = async (req, res) => {
   try {
     const { credential } = req.body;
 
@@ -26,6 +26,7 @@ const googleLogin = async (req, res) => {
         picture: payload.picture,
       });
     }
+
     const token = jwt.sign(
       {
         userId: user._id,
@@ -37,8 +38,6 @@ const googleLogin = async (req, res) => {
       }
     );
 
-    console.log(payload);
-
     res.json({
       success: true,
       token,
@@ -49,8 +48,4 @@ const googleLogin = async (req, res) => {
       message: error.message,
     });
   }
-};
-
-module.exports = {
-  googleLogin,
 };
