@@ -100,7 +100,10 @@ export const askAnalysis = async (req, res) => {
       analysis.transcript.length
     );
 
-    const answer = await askAnalysisQuestion(analysis.transcript, question);
+    const answer = await askAnalysisQuestion(analysis.transcript, question, {
+      userId: req.user.userId,
+      analysisId: id,
+    });
 
     res.json({ answer });
   } catch (error) {
@@ -160,7 +163,8 @@ export const uploadAnalysis = async (req, res) => {
     const transcript = await transcribeAudio(
       req.file.buffer,
       req.file.originalname,
-      req.file.mimetype
+      req.file.mimetype,
+      { userId: req.user.userId }
     );
 
     console.log("Transcript length:", transcript.length);
@@ -171,7 +175,7 @@ export const uploadAnalysis = async (req, res) => {
 
     try {
       console.log("Calling Summary...");
-      const result = await generateSummary(transcript);
+      const result = await generateSummary(transcript, { userId: req.user.userId });
       console.log("Gemini result:", result);
 
       summary = result.summary;
@@ -381,7 +385,10 @@ export const createYoutubeAnalysis = async (req, res) => {
 
         // Transcribing
         await Analysis.findByIdAndUpdate(placeholder._id, { durationSeconds, statusMessage: "Transcribing..." });
-        const transcript = await transcribeAudio(audio.buffer, audio.filename, audio.mimetype);
+        const transcript = await transcribeAudio(audio.buffer, audio.filename, audio.mimetype, {
+          userId: req.user.userId,
+          analysisId: placeholder._id,
+        });
 
         // Generating summary
         await Analysis.findByIdAndUpdate(placeholder._id, { statusMessage: "Generating summary..." });
@@ -390,7 +397,10 @@ export const createYoutubeAnalysis = async (req, res) => {
         let actionItems = [];
 
         try {
-          const result = await generateSummary(transcript);
+          const result = await generateSummary(transcript, {
+            userId: req.user.userId,
+            analysisId: placeholder._id,
+          });
           summary = result.summary;
           keyPoints = result.keyPoints;
           actionItems = result.actionItems;

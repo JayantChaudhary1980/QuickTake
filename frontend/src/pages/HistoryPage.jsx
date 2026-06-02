@@ -136,7 +136,9 @@ function HistoryPage() {
 
                         {/* Type */}
                         <div className="text-muted-foreground">
-                        {analysis.sourceType === "LIVE_CAPTURE"
+                        {analysis.sourceType === "YOUTUBE"
+                            ? "YouTube"
+                            : analysis.sourceType === "LIVE_CAPTURE"
                             ? "Live Capture"
                             : "Upload"}
                         </div>

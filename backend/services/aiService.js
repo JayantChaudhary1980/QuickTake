@@ -1,4 +1,5 @@
 import Groq from "groq-sdk";
+import { recordApiUsage } from "./apiUsageService.js";
 
 const MODEL = "llama-3.3-70b-versatile";
 const MAX_TRANSCRIPT_CHARS = 25000;
@@ -45,7 +46,7 @@ function extractJson(text) {
   }
 }
 
-export async function generateSummary(transcript) {
+export async function generateSummary(transcript, options = {}) {
   const groq = getGroqClient();
 
   const transcriptForPrompt =
@@ -57,8 +58,9 @@ export async function generateSummary(transcript) {
     transcriptForPrompt.length
   );
 
-  const completion =
-    await groq.chat.completions.create({
+  let completion;
+  try {
+    completion = await groq.chat.completions.create({
       model: MODEL,
       temperature: 0.2,
       messages: [
@@ -90,20 +92,44 @@ Rules:
         },
       ],
     });
+  } catch (err) {
+    try {
+      await recordApiUsage({
+        userId: options.userId,
+        analysisId: options.analysisId,
+        usage: {},
+        success: false,
+      });
+    } catch (e) {
+      console.error("Failed to record failed usage for summary:", e);
+    }
 
-  const text =
-    completion.choices?.[0]?.message?.content ?? "";
+    throw err;
+  }
 
-  console.log(
-    "Summary generated successfully"
-  );
+  const text = completion.choices?.[0]?.message?.content ?? "";
+
+  // attempt to record usage (may be undefined)
+  try {
+    await recordApiUsage({
+      userId: options.userId,
+      analysisId: options.analysisId,
+      usage: completion.usage ?? {},
+      success: true,
+    });
+  } catch (e) {
+    console.error("Failed to record usage for summary:", e);
+  }
+
+  console.log("Summary generated successfully");
 
   return extractJson(text);
 }
 
 export async function askAnalysisQuestion(
   transcript,
-  question
+  question,
+  options = {}
 ) {
   const groq = getGroqClient();
 
@@ -112,8 +138,9 @@ export async function askAnalysisQuestion(
 
   console.log("Ask question:", question);
 
-  const completion =
-    await groq.chat.completions.create({
+  let completion;
+  try {
+    completion = await groq.chat.completions.create({
       model: MODEL,
       temperature: 0.3,
       messages: [
@@ -134,6 +161,32 @@ ${question}
         },
       ],
     });
+  } catch (err) {
+    try {
+      await recordApiUsage({
+        userId: options.userId,
+        analysisId: options.analysisId,
+        usage: {},
+        success: false,
+      });
+    } catch (e) {
+      console.error("Failed to record failed usage for question:", e);
+    }
+
+    throw err;
+  }
+
+  // record usage
+  try {
+    await recordApiUsage({
+      userId: options.userId,
+      analysisId: options.analysisId,
+      usage: completion.usage ?? {},
+      success: true,
+    });
+  } catch (e) {
+    console.error("Failed to record usage for question:", e);
+  }
 
   return (
     completion.choices?.[0]?.message?.content ??

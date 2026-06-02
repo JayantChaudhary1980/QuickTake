@@ -166,6 +166,20 @@ export async function getAnalysisStats() {
   return data;
 }
 
+export async function getAdminDashboard() {
+  const response = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch admin dashboard");
+  }
+
+  return data;
+}
+
 export async function createYoutubeAnalysis(
   title,
   url
