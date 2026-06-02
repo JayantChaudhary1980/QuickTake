@@ -31,6 +31,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { getHealth, getAnalysisStats } from "@/services/api";
+import { formatDuration } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -78,7 +79,7 @@ function DashboardPage() {
   const [analyses, setAnalyses] = useState([]);
   const [newAnalysisOpen, setNewAnalysisOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [stats, setStats] = useState({ totalAnalyses: 0, thisWeek: 0, publicShares: 0 });
+  const [stats, setStats] = useState({ totalAnalyses: 0, thisWeek: 0, hoursSaved: 0 });
 
   const filteredAnalyses = analyses.filter((a) => {
     if (!search.trim()) return true;
@@ -158,7 +159,7 @@ function DashboardPage() {
         setStats({
           totalAnalyses: s.totalAnalyses ?? 0,
           thisWeek: s.thisWeek ?? 0,
-          publicShares: s.publicShares ?? 0,
+          hoursSaved: s.hoursSaved ?? 0,
         });
       } catch (err) {
         console.error("Failed to load analysis stats:", err);
@@ -167,6 +168,11 @@ function DashboardPage() {
   }, []);
 
   console.log("Analyses State:", analyses);
+
+  const displayTime =
+    stats.hoursSaved < 1
+      ? `${Math.max(1, Math.round(stats.hoursSaved * 60))} min`
+      : `${stats.hoursSaved.toFixed(1)} hr`;
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -247,7 +253,7 @@ function DashboardPage() {
             <div className="grid gap-4 sm:grid-cols-3">
               <StatCard label="Total analyses" value={stats.totalAnalyses} />
               <StatCard label="This week" value={stats.thisWeek} />
-              <StatCard label="Hours saved" value={stats.publicShares} />
+              <StatCard label="Hours saved" value={displayTime || 0} />
             </div>
 
             <section>
@@ -310,8 +316,13 @@ function DashboardPage() {
                         <CardDescription>{analysis.sourceType}</CardDescription>
                       </CardHeader>
                       <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="size-3.5 shrink-0" />
-                        {new Date(analysis.createdAt).toLocaleString()}
+                        <div className="flex items-start gap-2">
+                          <Clock className="size-3.5 shrink-0" />
+                          <div className="flex flex-col leading-tight">
+                            <span>{new Date(analysis.createdAt).toLocaleString()}</span>
+                            <span className="text-xs text-muted-foreground">{formatDuration(analysis.durationSeconds)}</span>
+                          </div>
+                        </div>
                       </CardContent>
                     </Card>
                   </Link>

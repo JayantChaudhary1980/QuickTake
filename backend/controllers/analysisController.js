@@ -6,6 +6,10 @@ import {
 } from "../services/aiService.js";
 import { transcribeAudio } from "../services/groqService.js";
 import { downloadYoutubeAudio } from "../services/youtubeService.js";
+import fs from "fs";
+import os from "os";
+import path from "path";
+import { execFileSync } from "child_process";
 
 export const createAnalysis = async (req, res) => {
   try {
@@ -13,6 +17,7 @@ export const createAnalysis = async (req, res) => {
       userId: req.user.userId,
       title: req.body.title,
       sourceType: req.body.sourceType,
+      durationSeconds: 0,
     });
 
     res.status(201).json(analysis);
@@ -120,6 +125,38 @@ export const uploadAnalysis = async (req, res) => {
     console.log("File received:", req.file.originalname);
     console.log("Size:", req.file.size);
 
+    // Attempt to determine duration using ffprobe
+    let durationSeconds = 0;
+    const tmpPath = path.join(os.tmpdir(), `upload-${Date.now()}-${req.file.originalname}`);
+    try {
+      fs.writeFileSync(tmpPath, req.file.buffer);
+      const out = execFileSync(
+        "ffprobe",
+        [
+          "-v",
+          "quiet",
+          "-print_format",
+          "json",
+          "-show_format",
+          "-show_streams",
+          tmpPath,
+        ],
+        { encoding: "utf8" }
+      );
+      const meta = JSON.parse(out || "{}");
+      if (meta.format && meta.format.duration) {
+        durationSeconds = Math.round(Number(meta.format.duration) || 0);
+      } else if (meta.streams && meta.streams[0] && meta.streams[0].duration) {
+        durationSeconds = Math.round(Number(meta.streams[0].duration) || 0);
+      }
+    } catch (err) {
+      console.warn("ffprobe failed or not available:", err);
+    } finally {
+      try {
+        if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+      } catch (e) {}
+    }
+
     const transcript = await transcribeAudio(
       req.file.buffer,
       req.file.originalname,
@@ -153,6 +190,7 @@ export const uploadAnalysis = async (req, res) => {
       summary,
       keyPoints,
       actionItems,
+      durationSeconds,
       status: "COMPLETED",
     });
 
@@ -285,9 +323,15 @@ export const getAnalysisStats = async (req, res) => {
       createdAt: { $gte: startOfWeek },
     });
 
-    const publicShares = await Analysis.countDocuments({ userId, isPublic: true });
+    const agg = await Analysis.aggregate([
+      { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+      { $group: { _id: null, totalDurationSeconds: { $sum: "$durationSeconds" } } },
+    ]);
 
-    res.json({ totalAnalyses, thisWeek, publicShares });
+    const totalDurationSeconds = agg?.[0]?.totalDurationSeconds || 0;
+    const hoursSaved = totalDurationSeconds / 3600;
+
+    res.json({ totalAnalyses, thisWeek, hoursSaved });
   } catch (error) {
     console.error("Get analysis stats error:", error);
     res.status(500).json({ message: "Failed to fetch analysis stats" });
@@ -310,48 +354,71 @@ export const createYoutubeAnalysis = async (req, res) => {
       });
     }
 
-    console.log("Downloading YouTube audio...");
-
-    const audio = await downloadYoutubeAudio(url);
-
-    console.log("Transcribing...");
-
-    const transcript = await transcribeAudio(
-      audio.buffer,
-      audio.filename,
-      audio.mimetype
-    );
-
-    let summary = "";
-    let keyPoints = [];
-    let actionItems = [];
-
-    try {
-      console.log("Generating summary...");
-
-      const result = await generateSummary(
-        transcript
-      );
-
-      summary = result.summary;
-      keyPoints = result.keyPoints;
-      actionItems = result.actionItems;
-    } catch (error) {
-      console.error(error);
-    }
-
-    const analysis = await Analysis.create({
+    // Create a placeholder analysis so the frontend can poll status.
+    const placeholder = await Analysis.create({
       userId: req.user.userId,
       title,
       sourceType: "YOUTUBE",
-      transcript,
-      summary,
-      keyPoints,
-      actionItems,
-      status: "COMPLETED",
+      transcript: "",
+      summary: "",
+      keyPoints: [],
+      actionItems: [],
+      durationSeconds: 0,
+      status: "PROCESSING",
+      statusMessage: "Downloading audio...",
     });
 
-    res.status(201).json(analysis);
+    // Return the placeholder immediately so the client can navigate to details and poll.
+    res.status(201).json(placeholder);
+
+    // Continue processing in background and update statusMessage along the way.
+    (async () => {
+      try {
+        // Download audio
+        await Analysis.findByIdAndUpdate(placeholder._id, { statusMessage: "Downloading audio..." });
+        const audio = await downloadYoutubeAudio(url);
+        const durationSeconds = Number(audio?.durationSeconds) || 0;
+
+        // Transcribing
+        await Analysis.findByIdAndUpdate(placeholder._id, { durationSeconds, statusMessage: "Transcribing..." });
+        const transcript = await transcribeAudio(audio.buffer, audio.filename, audio.mimetype);
+
+        // Generating summary
+        await Analysis.findByIdAndUpdate(placeholder._id, { statusMessage: "Generating summary..." });
+        let summary = "";
+        let keyPoints = [];
+        let actionItems = [];
+
+        try {
+          const result = await generateSummary(transcript);
+          summary = result.summary;
+          keyPoints = result.keyPoints;
+          actionItems = result.actionItems;
+        } catch (err) {
+          console.error("Summary generation failed:", err);
+        }
+
+        // Finalize
+        await Analysis.findByIdAndUpdate(placeholder._id, {
+          transcript,
+          summary,
+          keyPoints,
+          actionItems,
+          status: "COMPLETED",
+          statusMessage: "Completed",
+        });
+      } catch (err) {
+        console.error("Background YouTube processing failed:", err);
+        try {
+          await Analysis.findByIdAndUpdate(placeholder._id, {
+            statusMessage: `Failed: ${err.message || "error"}`,
+            status: "PROCESSING",
+          });
+        } catch (e) {
+          console.error("Failed to update placeholder on error:", e);
+        }
+      }
+    })();
   } catch (error) {
     console.error(error);
 

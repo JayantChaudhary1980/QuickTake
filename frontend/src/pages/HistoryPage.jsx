@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { formatDuration } from "@/lib/utils";
 
 function HistoryPage() {
   const [analyses, setAnalyses] = useState([]);
@@ -59,23 +59,25 @@ function HistoryPage() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-6xl px-8 py-10">
         <Link
-            to="/dashboard"
-            className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-            <ArrowLeft className="size-4" />
-            Back
+          to="/dashboard"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back
         </Link>
+
         <div className="mb-6 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-3">
-                <h1 className="text-4xl font-bold tracking-tight">
-                    History
-                </h1>
+              <h1 className="text-4xl font-bold tracking-tight">
+                History
+              </h1>
 
-                <span className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">
-                    {filteredAnalyses.length}
-                </span>
-                </div>
+              <span className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">
+                {filteredAnalyses.length}
+              </span>
+            </div>
+
             <p className="mt-1 text-muted-foreground">
               Browse all your previous analyses
             </p>
@@ -83,7 +85,9 @@ function HistoryPage() {
 
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
             <input
+              type="text"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -105,58 +109,76 @@ function HistoryPage() {
         ) : (
           <Card>
             <CardContent className="p-0">
-              <div className="grid grid-cols-[2fr_1fr_1fr_1fr] border-b border-border px-6 py-4 text-sm font-medium text-muted-foreground">
+                {/* Header */}
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] border-b border-border px-6 py-4 text-sm font-medium text-muted-foreground">
                 <div>Title</div>
                 <div>Type</div>
                 <div>Status</div>
                 <div>Date</div>
-              </div>
+                <div>Time</div>
+                <div>Duration</div>
+                </div>
 
-              {filteredAnalyses.map((analysis) => (
-                <Link
-                  key={analysis._id}
-                  to={`/analysis/${analysis._id}`}
-                  className="group block"
-                >
-                  <div className="grid grid-cols-[2fr_1fr_1fr_1fr] items-center border-b border-border/40 px-6 py-4 transition-colors hover:bg-muted/40">
-                    <div className="truncate font-medium transition-colors group-hover:text-violet-400">
-                      {analysis.title}
-                    </div>
+                {filteredAnalyses.map((analysis) => {
+                const createdDate = new Date(analysis.createdAt);
 
-                    <div className="text-muted-foreground">
-                      {analysis.sourceType === "LIVE_CAPTURE"
-                        ? "Live Capture"
-                        : "Upload"}
-                    </div>
+                return (
+                    <Link
+                    key={analysis._id}
+                    to={`/analysis/${analysis._id}`}
+                    className="group block"
+                    >
+                    <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] items-center border-b border-border/40 px-6 py-4 transition-colors hover:bg-muted/40">
+                        {/* Title */}
+                        <div className="truncate font-medium transition-colors group-hover:text-violet-400">
+                        {analysis.title}
+                        </div>
 
-                    <div>
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs font-medium ${
-                          analysis.status === "COMPLETED"
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-amber-500/15 text-amber-400"
-                        }`}
-                      >
-                        {analysis.status === "COMPLETED"
-                          ? "Complete"
-                          : "Processing"}
-                      </span>
-                    </div>
+                        {/* Type */}
+                        <div className="text-muted-foreground">
+                        {analysis.sourceType === "LIVE_CAPTURE"
+                            ? "Live Capture"
+                            : "Upload"}
+                        </div>
 
-                    <div className="text-muted-foreground">
-                      {new Date(
-                        analysis.createdAt
-                      ).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                        {/* Status */}
+                        <div>
+                        <span
+                            className={`rounded-full px-2 py-1 text-xs font-medium ${
+                            analysis.status === "COMPLETED"
+                                ? "bg-emerald-500/15 text-emerald-400"
+                                : "bg-amber-500/15 text-amber-400"
+                            }`}
+                        >
+                            {analysis.status === "COMPLETED"
+                            ? "Complete"
+                            : "Processing"}
+                        </span>
+                        </div>
+
+                        {/* Date */}
+                        <div className="text-muted-foreground">
+                        {createdDate.toLocaleDateString()}
+                        </div>
+
+                        {/* Time */}
+                        <div className="text-muted-foreground">
+                        {createdDate.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
+                        </div>
+
+                        {/* Duration */}
+                        <div className="text-muted-foreground">
+                        {formatDuration(analysis.durationSeconds || 0)}
+                        </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                    </Link>
+                );
+                })}
             </CardContent>
-          </Card>
+        </Card>
         )}
       </div>
     </div>

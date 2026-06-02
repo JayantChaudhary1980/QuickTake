@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, FileText, ListChecks, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, ListChecks, Sparkles, Trash2, Copy } from "lucide-react";
 import { jsPDF } from "jspdf";
+import { formatDuration } from "@/lib/utils";
 
 import { AnalysisCopilot } from "@/components/analysis-copilot";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -32,6 +33,7 @@ function AnalysisDetailsPage() {
 
   useEffect(() => {
     let isMounted = true;
+    let intervalId;
 
     const loadAnalysis = async () => {
       setIsLoading(true);
@@ -57,8 +59,23 @@ function AnalysisDetailsPage() {
 
     loadAnalysis();
 
+    // Poll status while processing
+    intervalId = setInterval(async () => {
+      try {
+        const data = await getAnalysisById(id);
+        if (!isMounted) return;
+        setAnalysis(data);
+        if (data.status !== "PROCESSING") {
+          clearInterval(intervalId);
+        }
+      } catch (e) {
+        // ignore polling errors
+      }
+    }, 3000);
+
     return () => {
       isMounted = false;
+      if (intervalId) clearInterval(intervalId);
     };
   }, [id]);
 
@@ -201,6 +218,28 @@ function AnalysisDetailsPage() {
     }
   };
 
+  const copySummary = async () => {
+    if (!analysis?.summary) return;
+    try {
+      await navigator.clipboard.writeText(analysis.summary);
+      toast.success("Copied to clipboard");
+    } catch (e) {
+      console.error("Copy failed", e);
+      toast.error("Failed to copy");
+    }
+  };
+
+  const copyTranscript = async () => {
+    if (!analysis?.transcript) return;
+    try {
+      await navigator.clipboard.writeText(analysis.transcript);
+      toast.success("Copied to clipboard");
+    } catch (e) {
+      console.error("Copy failed", e);
+      toast.error("Failed to copy");
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-border/60 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
@@ -274,7 +313,11 @@ function AnalysisDetailsPage() {
 
       <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         {isLoading && (
-          <p className="text-sm text-muted-foreground">Loading analysis...</p>
+          <div className="space-y-6">
+            <div className="h-8 w-1/3 animate-pulse rounded bg-muted/30" />
+            <div className="h-40 animate-pulse rounded bg-muted/30" />
+            <div className="h-40 animate-pulse rounded bg-muted/30" />
+          </div>
         )}
 
         {error && !isLoading && (
@@ -291,15 +334,31 @@ function AnalysisDetailsPage() {
         {analysis && !isLoading && (
           <>
             <div className="mb-6">
-              <div className="flex items-center gap-3 text-sm">
-                <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-300">
-                  {analysis.sourceType}
-                </span>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-3">
+                  <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-300">
+                    {analysis.sourceType}
+                  </span>
 
-                <span className="text-muted-foreground">
-                  {new Date(analysis.createdAt).toLocaleString()}
+                  <span>
+                    {formatDuration(analysis.durationSeconds)}
+                  </span>
+                </div>
+
+                <span>
+                  {new Date(analysis.createdAt).toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                  })}
                 </span>
               </div>
+
+              {analysis.status === "PROCESSING" && analysis.statusMessage && (
+                <div className="mt-2 text-sm text-muted-foreground">Status: {analysis.statusMessage}</div>
+              )}
               {!isEditing ? (
                 <div className="flex items-center gap-3">
                   <h1 className="mt-3 text-4xl font-bold tracking-tight">
@@ -355,14 +414,20 @@ function AnalysisDetailsPage() {
               <main className="min-w-0 flex-1 space-y-6 lg:overflow-y-auto">
                 <Card className="border-border/60">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Sparkles className="size-5 text-violet-400" />
-                      Summary
+                    <CardTitle className="flex items-center justify-between gap-2 text-lg">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="size-5 text-violet-400" />
+                        Summary
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={copySummary}>
+                        <Copy className="size-4" />
+                        <span className="sr-only">Copy summary</span>
+                      </Button>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-                      {analysis.summary || "No summary available."}
+                      {analysis.summary ? analysis.summary : "Summary not available."}
                     </p>
                   </CardContent>
                 </Card>
@@ -427,16 +492,22 @@ function AnalysisDetailsPage() {
 
                 <Card className="border-border/60">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <FileText className="size-5 text-violet-400" />
-                      Transcript
+                    <CardTitle className="flex items-center justify-between gap-2 text-lg">
+                      <div className="flex items-center gap-2">
+                        <FileText className="size-5 text-violet-400" />
+                        Transcript
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={copyTranscript}>
+                        <Copy className="size-4" />
+                        <span className="sr-only">Copy transcript</span>
+                      </Button>
                     </CardTitle>
                   </CardHeader>
                   <Separator />
                   <CardContent className="pt-6">
                     <div className="max-h-[28rem] overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-4 lg:max-h-none">
                       <p className="whitespace-pre-wrap text-[15px] leading-8">
-                        {analysis.transcript.trim() || "No transcript available."}
+                        {analysis.transcript && analysis.transcript.trim() ? analysis.transcript : "Transcript not available."}
                       </p>
                     </div>
                   </CardContent>
