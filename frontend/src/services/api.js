@@ -124,3 +124,30 @@ export async function renameAnalysis(id, title) {
 
   return data;
 }
+
+export async function shareAnalysis(id) {
+  const response = await fetch(`${API_BASE_URL}/api/analyses/${id}/share`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to share analysis");
+  }
+
+  return data;
+}
+
+export async function getPublicAnalysis(id) {
+  const response = await fetch(`${API_BASE_URL}/api/public/analyses/${id}`);
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch public analysis");
+  }
+
+  return data;
+}

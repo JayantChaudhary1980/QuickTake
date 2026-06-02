@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getAnalysisById } from "@/services/api";
-import { deleteAnalysis, renameAnalysis } from "@/services/api";
+import { deleteAnalysis, renameAnalysis, shareAnalysis } from "@/services/api";
 import { toast } from "sonner";
 
 function AnalysisDetailsPage() {
@@ -73,6 +73,24 @@ function AnalysisDetailsPage() {
           </Button>
           <div className="flex items-center gap-2">
             <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                try {
+                  const result = await shareAnalysis(id);
+                  const url = result.url;
+                  await navigator.clipboard.writeText(url);
+                  toast.success("Share URL copied to clipboard");
+                } catch (err) {
+                  console.error(err);
+                  toast.error(err instanceof Error ? err.message : "Failed to create share link");
+                }
+              }}
+            >
+              Share
+            </Button>
+
+            <Button
               variant="destructive"
               size="sm"
               onClick={async () => {
@@ -125,13 +143,18 @@ function AnalysisDetailsPage() {
         {analysis && !isLoading && (
           <>
             <div className="mb-6">
-              <p className="text-sm text-muted-foreground">
-                {analysis.sourceType} ·{" "}
-                {new Date(analysis.createdAt).toLocaleString()}
-              </p>
+              <div className="flex items-center gap-3 text-sm">
+                <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-300">
+                  {analysis.sourceType}
+                </span>
+
+                <span className="text-muted-foreground">
+                  {new Date(analysis.createdAt).toLocaleString()}
+                </span>
+              </div>
               {!isEditing ? (
                 <div className="flex items-center gap-3">
-                  <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+                  <h1 className="mt-3 text-4xl font-bold tracking-tight">
                     {analysis.title}
                   </h1>
                   <Button
@@ -264,7 +287,7 @@ function AnalysisDetailsPage() {
                   <Separator />
                   <CardContent className="pt-6">
                     <div className="max-h-[28rem] overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-4 lg:max-h-none">
-                      <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                      <p className="whitespace-pre-wrap text-[15px] leading-8">
                         {analysis.transcript || "No transcript available."}
                       </p>
                     </div>
@@ -272,7 +295,7 @@ function AnalysisDetailsPage() {
                 </Card>
               </main>
 
-              <aside className="w-full shrink-0 lg:sticky lg:top-[5.5rem] lg:w-[min(100%,400px)] lg:max-w-[420px] lg:self-start">
+              <aside className="w-full shrink-0 lg:sticky lg:top-[5.5rem] lg:w-[360px] lg:max-w-[360px] lg:self-start">
                 <AnalysisCopilot analysisId={id} />
               </aside>
             </div>

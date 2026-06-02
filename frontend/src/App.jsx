@@ -5,6 +5,7 @@ import LandingPage from "./pages/LandingPage";
 import UploadPage from "./pages/UploadPage";
 import AnalysisDetailsPage from "./pages/AnalysisDetailsPage";
 import LiveCapturePage from "./pages/LiveCapturePage";
+import PublicAnalysisPage from "./pages/PublicAnalysisPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -49,6 +50,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/share/:id" element={<PublicAnalysisPage />} />
       </Routes>
     </BrowserRouter>
   );

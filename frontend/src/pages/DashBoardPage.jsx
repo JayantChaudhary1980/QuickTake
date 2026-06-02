@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Menu,
   Plus,
+  Search,
   Settings,
   Zap,
 } from "lucide-react";
@@ -201,7 +202,7 @@ function DashboardPage() {
           </Sheet>
 
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-lg font-semibold tracking-tight">
+            <h1 className="truncate text-3xl font-bold tracking-tight">
               {navItems.find((item) => item.id === activeNav)?.label ?? "Dashboard"}
             </h1>
             <p className="hidden text-sm text-muted-foreground sm:block">
@@ -247,13 +248,17 @@ function DashboardPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <input
-                    aria-label="Search analyses"
-                    placeholder="Search analyses"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground"
-                  />
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
+                    <input
+                      aria-label="Search"
+                      placeholder="Search..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-64 rounded-md border border-input bg-transparent py-2 pl-10 pr-3 text-sm"
+                    />
+                  </div>
                 
                   <Button
                   className="hidden sm:inline-flex"
@@ -378,7 +383,7 @@ function SidebarContent({
               >
                 <p className="truncate font-medium">{analysis.title}</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {new Date(analysis.createdAt).toLocaleString()}
+                  {new Date(analysis.createdAt).toLocaleDateString()}
                 </p>
               </button>
             </li>

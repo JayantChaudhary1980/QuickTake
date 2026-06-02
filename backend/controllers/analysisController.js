@@ -212,3 +212,53 @@ export const updateAnalysisTitle = async (req, res) => {
     res.status(500).json({ message: "Failed to update analysis" });
   }
 };
+
+export const shareAnalysis = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    const analysis = await Analysis.findOne({ _id: id, userId: req.user.userId });
+
+    if (!analysis) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    analysis.isPublic = true;
+    await analysis.save();
+
+    const host = process.env.PUBLIC_HOST || "http://localhost:3000";
+    const shareUrl = `${host}/share/${analysis._id}`;
+
+    res.json({ url: shareUrl });
+  } catch (error) {
+    console.error("Share analysis error:", error);
+    res.status(500).json({ message: "Failed to share analysis" });
+  }
+};
+
+export const getPublicAnalysis = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    const analysis = await Analysis.findOne({ _id: id, isPublic: true });
+
+    if (!analysis) {
+      return res.status(404).json({ message: "Analysis not found or not public" });
+    }
+
+    const { title, summary, keyPoints, actionItems, transcript, sourceType, createdAt } = analysis;
+
+    res.json({ title, summary, keyPoints, actionItems, transcript, sourceType, createdAt });
+  } catch (error) {
+    console.error("Get public analysis error:", error);
+    res.status(500).json({ message: "Failed to fetch public analysis" });
+  }
+};

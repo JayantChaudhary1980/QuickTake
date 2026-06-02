@@ -5,6 +5,7 @@ import express from "express";
 import connectDB from "./config/db.js";
 import protect from "./middleware/authMiddleware.js";
 import analysisRoutes from "./routes/analysisRoutes.js";
+import { getPublicAnalysis } from "./controllers/analysisController.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
@@ -37,6 +38,8 @@ app.get("/api/protected", protect, (req, res) => {
     user: req.user,
   });
 });
+
+app.get("/api/public/analyses/:id", getPublicAnalysis);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

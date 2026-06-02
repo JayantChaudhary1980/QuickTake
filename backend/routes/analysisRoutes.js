@@ -7,6 +7,7 @@ import {
   uploadAnalysis,
   deleteAnalysis,
   updateAnalysisTitle,
+  shareAnalysis,
 } from "../controllers/analysisController.js";
 import protect from "../middleware/authMiddleware.js";
 import { handleUploadError, upload } from "../middleware/uploadMiddleware.js";
@@ -34,5 +35,6 @@ router.get("/:id", protect, getAnalysisById);
 
 router.delete("/:id", protect, deleteAnalysis);
 router.patch("/:id", protect, updateAnalysisTitle);
+router.patch("/:id/share", protect, shareAnalysis);
 
 export default router;

@@ -39,6 +39,11 @@ const analysisSchema = new mongoose.Schema(
       default: [],
     },
 
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
+
     status: {
       type: String,
       enum: ["PROCESSING", "COMPLETED"],
