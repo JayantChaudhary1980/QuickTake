@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, FileText, ListChecks, Sparkles } from "lucide-react";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, CheckCircle2, FileText, ListChecks, Sparkles, Trash2 } from "lucide-react";
 
 import { AnalysisCopilot } from "@/components/analysis-copilot";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -14,12 +15,19 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getAnalysisById } from "@/services/api";
+import { deleteAnalysis, renameAnalysis } from "@/services/api";
+import { toast } from "sonner";
 
 function AnalysisDetailsPage() {
   const { id } = useParams();
   const [analysis, setAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
@@ -63,7 +71,38 @@ function AnalysisDetailsPage() {
               Back
             </Link>
           </Button>
-          <ModeToggle />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={async () => {
+                if (isDeleting) return;
+
+                const ok = window.confirm(
+                  "Delete this analysis? This action cannot be undone."
+                );
+
+                if (!ok) return;
+
+                setIsDeleting(true);
+
+                try {
+                  await deleteAnalysis(id);
+                  toast.success("Analysis deleted");
+                  navigate("/dashboard");
+                } catch (err) {
+                  console.error(err);
+                  toast.error(err instanceof Error ? err.message : "Failed to delete analysis");
+                } finally {
+                  setIsDeleting(false);
+                }
+              }}
+            >
+              <Trash2 className="size-4 mr-2" /> Delete
+            </Button>
+
+            <ModeToggle />
+          </div>
         </div>
       </header>
 
@@ -90,9 +129,55 @@ function AnalysisDetailsPage() {
                 {analysis.sourceType} ·{" "}
                 {new Date(analysis.createdAt).toLocaleString()}
               </p>
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                {analysis.title}
-              </h1>
+              {!isEditing ? (
+                <div className="flex items-center gap-3">
+                  <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+                    {analysis.title}
+                  </h1>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditTitle(analysis.title || "");
+                      setIsEditing(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="min-w-0" />
+                  <Button
+                    onClick={async () => {
+                      if (isSavingTitle) return;
+                      setIsSavingTitle(true);
+                      try {
+                        const updated = await renameAnalysis(id, editTitle.trim());
+                        setAnalysis((prev) => ({ ...prev, title: updated.title }));
+                        setIsEditing(false);
+                        toast.success("Title updated");
+                      } catch (err) {
+                        console.error(err);
+                        toast.error(err instanceof Error ? err.message : "Failed to update title");
+                      } finally {
+                        setIsSavingTitle(false);
+                      }
+                    }}
+                    disabled={isSavingTitle}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setIsEditing(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col items-start gap-6 lg:flex-row">

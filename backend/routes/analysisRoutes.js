@@ -5,6 +5,8 @@ import {
   getAnalyses,
   getAnalysisById,
   uploadAnalysis,
+  deleteAnalysis,
+  updateAnalysisTitle,
 } from "../controllers/analysisController.js";
 import protect from "../middleware/authMiddleware.js";
 import { handleUploadError, upload } from "../middleware/uploadMiddleware.js";
@@ -29,5 +31,8 @@ router.get("/", protect, getAnalyses);
 router.post("/:id/ask", protect, askAnalysis);
 
 router.get("/:id", protect, getAnalysisById);
+
+router.delete("/:id", protect, deleteAnalysis);
+router.patch("/:id", protect, updateAnalysisTitle);
 
 export default router;

@@ -90,3 +90,37 @@ export async function createUser(userData) {
   
     return response.json();
   }
+
+export async function deleteAnalysis(id) {
+  const response = await fetch(`${API_BASE_URL}/api/analyses/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to delete analysis");
+  }
+
+  return data;
+}
+
+export async function renameAnalysis(id, title) {
+  const response = await fetch(`${API_BASE_URL}/api/analyses/${id}`, {
+    method: "PATCH",
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to rename analysis");
+  }
+
+  return data;
+}

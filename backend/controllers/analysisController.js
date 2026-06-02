@@ -160,3 +160,55 @@ export const uploadAnalysis = async (req, res) => {
     });
   }
 };
+
+export const deleteAnalysis = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    const analysis = await Analysis.findOne({ _id: id, userId: req.user.userId });
+
+    if (!analysis) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    await Analysis.deleteOne({ _id: id });
+
+    res.json({ success: true, message: "Analysis deleted" });
+  } catch (error) {
+    console.error("Delete analysis error:", error);
+    res.status(500).json({ message: "Failed to delete analysis" });
+  }
+};
+
+export const updateAnalysisTitle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const title = req.body.title?.trim();
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    const analysis = await Analysis.findOne({ _id: id, userId: req.user.userId });
+
+    if (!analysis) {
+      return res.status(404).json({ message: "Analysis not found" });
+    }
+
+    analysis.title = title;
+    await analysis.save();
+
+    res.json(analysis);
+  } catch (error) {
+    console.error("Update analysis title error:", error);
+    res.status(500).json({ message: "Failed to update analysis" });
+  }
+};
