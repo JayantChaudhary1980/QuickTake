@@ -15,7 +15,7 @@ const analysisSchema = new mongoose.Schema(
 
     sourceType: {
       type: String,
-      enum: ["UPLOAD", "LIVE_CAPTURE"],
+      enum: ["UPLOAD", "LIVE_CAPTURE", "YOUTUBE"],
       default: "UPLOAD",
     },
 

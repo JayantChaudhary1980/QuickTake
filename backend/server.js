@@ -9,6 +9,7 @@ import { getPublicAnalysis } from "./controllers/analysisController.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
+
 dotenv.config();
 
 connectDB();

@@ -151,3 +151,49 @@ export async function getPublicAnalysis(id) {
 
   return data;
 }
+
+export async function getAnalysisStats() {
+  const response = await fetch(`${API_BASE_URL}/api/analyses/stats`, {
+    headers: getAuthHeaders(),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to fetch analysis stats");
+  }
+
+  return data;
+}
+
+export async function createYoutubeAnalysis(
+  title,
+  url
+) {
+  const response = await fetch(
+    `${API_BASE_URL}/api/analyses/youtube`,
+    {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        url,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Failed to analyze YouTube video"
+    );
+  }
+
+  return data;
+}

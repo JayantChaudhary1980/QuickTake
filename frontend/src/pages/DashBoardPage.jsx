@@ -30,7 +30,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { getHealth } from "@/services/api";
+import { getHealth, getAnalysisStats } from "@/services/api";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -78,6 +78,7 @@ function DashboardPage() {
   const [analyses, setAnalyses] = useState([]);
   const [newAnalysisOpen, setNewAnalysisOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [stats, setStats] = useState({ totalAnalyses: 0, thisWeek: 0, publicShares: 0 });
 
   const filteredAnalyses = analyses.filter((a) => {
     if (!search.trim()) return true;
@@ -151,6 +152,18 @@ function DashboardPage() {
       });
   
     fetchAnalyses();
+    (async () => {
+      try {
+        const s = await getAnalysisStats();
+        setStats({
+          totalAnalyses: s.totalAnalyses ?? 0,
+          thisWeek: s.thisWeek ?? 0,
+          publicShares: s.publicShares ?? 0,
+        });
+      } catch (err) {
+        console.error("Failed to load analysis stats:", err);
+      }
+    })();
   }, []);
 
   console.log("Analyses State:", analyses);
@@ -172,7 +185,7 @@ function DashboardPage() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center gap-3 border-b border-border/60 px-4 md:px-6">
+        <header className="flex min-h-20 items-center gap-3 border-b border-border/60 px-6 md:px-10">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button
@@ -232,9 +245,9 @@ function DashboardPage() {
             )}
 
             <div className="grid gap-4 sm:grid-cols-3">
-              <StatCard label="Total analyses" value="24" />
-              <StatCard label="This week" value="6" />
-              <StatCard label="Hours saved" value="18h" />
+              <StatCard label="Total analyses" value={stats.totalAnalyses} />
+              <StatCard label="This week" value={stats.thisWeek} />
+              <StatCard label="Hours saved" value={stats.publicShares} />
             </div>
 
             <section>
@@ -274,7 +287,7 @@ function DashboardPage() {
                 {filteredAnalyses.length === 0 ? (
                   <div className="col-span-full py-6 text-center text-sm text-muted-foreground">No analyses found</div>
                 ) : (
-                  filteredAnalyses.map((analysis) => (
+                  filteredAnalyses.slice(0,4).map((analysis) => (
                   <Link
                     key={analysis._id}
                     to={`/analysis/${analysis._id}`}
@@ -304,6 +317,14 @@ function DashboardPage() {
                   </Link>
                 ))
                 )}
+              </div>
+              <div className="mt-8 flex justify-center">
+                <Link
+                  to="/history"
+                  className="text-sm font-medium text-white transition-colors hover:text-violet-400"
+                >
+                  View all analyses →
+                </Link>
               </div>
             </section>
           </div>
@@ -344,6 +365,25 @@ function SidebarContent({
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeNav === item.id;
+
+          if (item.id === "history") {
+            return (
+              <Button
+                key={item.id}
+                asChild
+                variant={isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-2 font-normal",
+                  isActive && "bg-secondary"
+                )}
+              >
+                <Link to="/history" onClick={() => onNavChange(item.id)}>
+                  <Icon className="size-4 shrink-0" />
+                  {item.label}
+                </Link>
+              </Button>
+            );
+          }
 
           return (
             <Button
@@ -415,9 +455,16 @@ function SidebarContent({
 function StatCard({ label, value }) {
   return (
     <Card className="border-border/60 bg-card/50">
-      <CardContent className="pt-6">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="mt-1 text-2xl font-semibold tracking-tight">{value}</p>
+      <CardContent className="py-2 px-6">
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            {label}
+          </p>
+
+          <h3 className="text-4xl font-bold tracking-tight">
+            {value}
+          </h3>
+        </div>
       </CardContent>
     </Card>
   );

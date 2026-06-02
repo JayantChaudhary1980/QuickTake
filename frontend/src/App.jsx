@@ -6,6 +6,8 @@ import UploadPage from "./pages/UploadPage";
 import AnalysisDetailsPage from "./pages/AnalysisDetailsPage";
 import LiveCapturePage from "./pages/LiveCapturePage";
 import PublicAnalysisPage from "./pages/PublicAnalysisPage";
+import HistoryPage from "./pages/HistoryPage";
+import YoutubeAnalysisPage from "./pages/YoutubeAnalysisPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -51,6 +53,22 @@ function App() {
           }
         />
         <Route path="/share/:id" element={<PublicAnalysisPage />} />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <HistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/youtube"
+          element={
+            <ProtectedRoute>
+              <YoutubeAnalysisPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -3,8 +3,9 @@ import Analysis from "../models/Analysis.js";
 import {
   askAnalysisQuestion,
   generateSummary,
-} from "../services/geminiService.js";
+} from "../services/aiService.js";
 import { transcribeAudio } from "../services/groqService.js";
+import { downloadYoutubeAudio } from "../services/youtubeService.js";
 
 export const createAnalysis = async (req, res) => {
   try {
@@ -132,13 +133,16 @@ export const uploadAnalysis = async (req, res) => {
     let actionItems = [];
 
     try {
-      // const result = await generateSummary(transcript);
+      console.log("Calling Summary...");
+      const result = await generateSummary(transcript);
+      console.log("Gemini result:", result);
 
-      // summary = result.summary;
-      // keyPoints = result.keyPoints;
-      // actionItems = result.actionItems;
+      summary = result.summary;
+      keyPoints = result.keyPoints;
+      actionItems = result.actionItems;
     } catch (error) {
-      console.log("Gemini unavailable, saving transcript only");
+      console.error("Summary generation failed:");
+      console.error(error);
     }
 
     const analysis = await Analysis.create({
@@ -260,5 +264,99 @@ export const getPublicAnalysis = async (req, res) => {
   } catch (error) {
     console.error("Get public analysis error:", error);
     res.status(500).json({ message: "Failed to fetch public analysis" });
+  }
+};
+
+export const getAnalysisStats = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const totalAnalyses = await Analysis.countDocuments({ userId });
+
+    const now = new Date();
+    const day = now.getDay(); // 0 (Sun) - 6 (Sat)
+    const daysSinceMonday = (day + 6) % 7; // convert so Monday=0
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - daysSinceMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const thisWeek = await Analysis.countDocuments({
+      userId,
+      createdAt: { $gte: startOfWeek },
+    });
+
+    const publicShares = await Analysis.countDocuments({ userId, isPublic: true });
+
+    res.json({ totalAnalyses, thisWeek, publicShares });
+  } catch (error) {
+    console.error("Get analysis stats error:", error);
+    res.status(500).json({ message: "Failed to fetch analysis stats" });
+  }
+};
+
+export const createYoutubeAnalysis = async (req, res) => {
+  try {
+    const { title, url } = req.body;
+
+    if (!title?.trim()) {
+      return res.status(400).json({
+        message: "Title is required",
+      });
+    }
+
+    if (!url?.trim()) {
+      return res.status(400).json({
+        message: "YouTube URL is required",
+      });
+    }
+
+    console.log("Downloading YouTube audio...");
+
+    const audio = await downloadYoutubeAudio(url);
+
+    console.log("Transcribing...");
+
+    const transcript = await transcribeAudio(
+      audio.buffer,
+      audio.filename,
+      audio.mimetype
+    );
+
+    let summary = "";
+    let keyPoints = [];
+    let actionItems = [];
+
+    try {
+      console.log("Generating summary...");
+
+      const result = await generateSummary(
+        transcript
+      );
+
+      summary = result.summary;
+      keyPoints = result.keyPoints;
+      actionItems = result.actionItems;
+    } catch (error) {
+      console.error(error);
+    }
+
+    const analysis = await Analysis.create({
+      userId: req.user.userId,
+      title,
+      sourceType: "YOUTUBE",
+      transcript,
+      summary,
+      keyPoints,
+      actionItems,
+      status: "COMPLETED",
+    });
+
+    res.status(201).json(analysis);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to process YouTube video",
+    });
   }
 };

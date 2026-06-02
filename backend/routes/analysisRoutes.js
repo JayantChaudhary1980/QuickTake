@@ -8,6 +8,8 @@ import {
   deleteAnalysis,
   updateAnalysisTitle,
   shareAnalysis,
+  getAnalysisStats,
+  createYoutubeAnalysis,
 } from "../controllers/analysisController.js";
 import protect from "../middleware/authMiddleware.js";
 import { handleUploadError, upload } from "../middleware/uploadMiddleware.js";
@@ -29,6 +31,8 @@ router.post("/", protect, createAnalysis);
 
 router.get("/", protect, getAnalyses);
 
+router.get("/stats", protect, getAnalysisStats);
+
 router.post("/:id/ask", protect, askAnalysis);
 
 router.get("/:id", protect, getAnalysisById);
@@ -36,5 +40,7 @@ router.get("/:id", protect, getAnalysisById);
 router.delete("/:id", protect, deleteAnalysis);
 router.patch("/:id", protect, updateAnalysisTitle);
 router.patch("/:id/share", protect, shareAnalysis);
+
+router.post("/youtube", protect, createYoutubeAnalysis);
 
 export default router;

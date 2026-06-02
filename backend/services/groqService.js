@@ -26,3 +26,4 @@ export async function transcribeAudio(buffer, originalname, mimetype) {
 
   return transcription.text ?? "";
 }
+

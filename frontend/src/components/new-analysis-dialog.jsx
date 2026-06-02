@@ -51,6 +51,10 @@ export function NewAnalysisDialog({ open, onOpenChange }) {
       navigate("/analysis/new/upload");
     }
 
+    if (selectedOption === "youtube") {
+      navigate("/youtube");
+    }
+
     if (selectedOption === "live") {
       navigate("/analysis/new/live");
     }
