@@ -76,6 +76,12 @@ function DashboardPage() {
   const [backendOk, setBackendOk] = useState(false);
   const [analyses, setAnalyses] = useState([]);
   const [newAnalysisOpen, setNewAnalysisOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredAnalyses = analyses.filter((a) => {
+    if (!search.trim()) return true;
+    return (a.title || "").toLowerCase().includes(search.trim().toLowerCase());
+  });
 
   const fetchAnalyses = async () => {
     try {
@@ -240,17 +246,30 @@ function DashboardPage() {
                     Pick up where you left off or start something new
                   </p>
                 </div>
-                <Button
+                <div className="flex items-center gap-3">
+                  <input
+                    aria-label="Search analyses"
+                    placeholder="Search analyses"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full max-w-sm rounded-md border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground"
+                  />
+                
+                  <Button
                   className="hidden sm:inline-flex"
                   onClick={() => setNewAnalysisOpen(true)}
                 >
                   <Plus className="size-4" />
                   New Analysis
                 </Button>
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                {analyses.map((analysis) => (
+                {filteredAnalyses.length === 0 ? (
+                  <div className="col-span-full py-6 text-center text-sm text-muted-foreground">No analyses found</div>
+                ) : (
+                  filteredAnalyses.map((analysis) => (
                   <Link
                     key={analysis._id}
                     to={`/analysis/${analysis._id}`}
@@ -278,7 +297,8 @@ function DashboardPage() {
                       </CardContent>
                     </Card>
                   </Link>
-                ))}
+                ))
+                )}
               </div>
             </section>
           </div>
