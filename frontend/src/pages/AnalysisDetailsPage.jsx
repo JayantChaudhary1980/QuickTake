@@ -311,7 +311,7 @@ function AnalysisDetailsPage() {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-7xl flex-1 overflow-hidden px-4 py-8 sm:px-6 sm:py-10">
         {isLoading && (
           <div className="space-y-6">
             <div className="h-8 w-1/3 animate-pulse rounded bg-muted/30" />
@@ -360,8 +360,8 @@ function AnalysisDetailsPage() {
                 <div className="mt-2 text-sm text-muted-foreground">Status: {analysis.statusMessage}</div>
               )}
               {!isEditing ? (
-                <div className="flex items-center gap-3">
-                  <h1 className="mt-3 text-4xl font-bold tracking-tight">
+                <div className="mt-4 flex items-center gap-3">
+                  <h1 className="text-4xl font-bold tracking-tight">
                     {analysis.title}
                   </h1>
                   <Button
@@ -410,8 +410,8 @@ function AnalysisDetailsPage() {
               )}
             </div>
 
-            <div className="flex flex-col items-start gap-6 lg:flex-row">
-              <main className="min-w-0 flex-1 space-y-6 lg:overflow-y-auto">
+            <div className="flex flex-col gap-6 lg:flex-row lg:h-[calc(100vh-12rem)]">
+              <main className="min-w-0 flex-1 space-y-6">
                 <Card className="border-border/60">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between gap-2 text-lg">
@@ -514,7 +514,7 @@ function AnalysisDetailsPage() {
                 </Card>
               </main>
 
-              <aside className="w-full shrink-0 lg:sticky lg:top-[5.5rem] lg:w-[360px] lg:max-w-[360px] lg:self-start">
+              <aside className="w-full shrink-0 lg:w-[360px] lg:h-full overflow-hidden">
                 <AnalysisCopilot analysisId={id} />
               </aside>
             </div>

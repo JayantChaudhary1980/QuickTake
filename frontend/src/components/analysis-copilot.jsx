@@ -64,7 +64,7 @@ export function AnalysisCopilot({ analysisId }) {
   };
 
   return (
-    <Card className="flex h-full min-h-[32rem] flex-col border-border/60 lg:min-h-0 lg:h-[calc(100vh-3.5rem)]">
+    <Card className="flex h-full flex-col border-border/60 overflow-hidden">
       <CardHeader className="shrink-0 border-b border-border/60 pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
           <MessageSquare className="size-5 text-violet-400" />
@@ -78,7 +78,7 @@ export function AnalysisCopilot({ analysisId }) {
       <CardContent className="min-h-0 flex-1 overflow-hidden p-0">
         <div
           ref={scrollRef}
-          className="h-full space-y-3 overflow-y-auto px-4 py-4"
+          className="h-full overflow-y-auto px-4 py-4"
         >
           {messages.length === 0 && !isLoading && (
             <div className="space-y-4">

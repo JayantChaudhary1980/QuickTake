@@ -67,22 +67,6 @@ function HistoryPage() {
         </Link>
 
         <div className="mb-6 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-bold tracking-tight">
-                History
-              </h1>
-
-              <span className="rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground">
-                {filteredAnalyses.length}
-              </span>
-            </div>
-
-            <p className="mt-1 text-muted-foreground">
-              Browse all your previous analyses
-            </p>
-          </div>
-
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 

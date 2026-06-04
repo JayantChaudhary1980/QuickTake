@@ -14,6 +14,13 @@ import {
 } from "lucide-react";
 
 import { ModeToggle } from "@/components/mode-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -46,12 +53,12 @@ const features = [
       "Ask questions about any meeting. Search transcripts and get cited answers instantly.",
     icon: Bot,
   },
-  {
-    title: "Screen Understanding",
-    description:
-      "AI reads slides, demos, and shared screens so context from visuals is never lost.",
-    icon: Monitor,
-  },
+  // {
+  //   title: "Screen Understanding",
+  //   description:
+  //     "AI reads slides, demos, and shared screens so context from visuals is never lost.",
+  //   icon: Monitor,
+  // },
   {
     title: "YouTube Analysis",
     description:
@@ -61,6 +68,19 @@ const features = [
 ];
 
 function LandingPage() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  let user = null;
+  try {
+    user = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("user") || "null") : null;
+  } catch (e) {
+    user = null;
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  };
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -87,27 +107,57 @@ function LandingPage() {
             </a>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <ModeToggle />
-            {/* <Button variant="outline" size="sm" asChild>
-              <Link to="/dashboard">Login</Link>
-            </Button> */}
-            <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                fetch("http://localhost:8000/api/auth/google", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ credential: credentialResponse.credential }),
-                })
-                  .then((res) => res.json())
-                  .then((data) => {
-                    localStorage.setItem("token", data.token);
-                    localStorage.setItem("user", JSON.stringify(data.user));
-                  })
-                  .catch((e) => console.error(e));
-              }}
-              onError={() => console.log("Login Failed")}
-            />
+            {!token ? (
+              <div className="scale-95 origin-left rounded-md border border-border/60 overflow-hidden">
+                <GoogleLogin
+                  shape="rectangular"
+                  size="large"
+                  text="signin"
+                  onSuccess={(credentialResponse) => {
+                    fetch("http://localhost:8000/api/auth/google", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ credential: credentialResponse.credential }),
+                    })
+                    .then((res) => res.json())
+                    .then((data) => {
+                      localStorage.setItem("token", data.token);
+                      localStorage.setItem("user", JSON.stringify(data.user));
+                      window.location.href = "/dashboard";
+                    })
+                    .catch((e) => console.error(e));
+                  }}
+                  onError={() => console.log("Login Failed")}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <div className="flex items-center gap-2">
+                      {user && (user.avatar || user.picture || user.profilePicture) ? (
+                        <img src={user.avatar || user.picture || user.profilePicture} alt="avatar" className="h-8 w-8 rounded-full" />
+                      ) : (
+                        <div className="h-8 w-8 items-center justify-center rounded-full bg-muted flex text-sm font-medium">
+                          {(user && user.name) ? user.name.split(" ").map(s=>s[0]).slice(0,2).join("") : "U"}
+                        </div>
+                      )}
+                      <span className="hidden sm:inline">{(user && user.name) || "User"}</span>
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={8} className="w-auto min-w-0 p-1">
+                    <DropdownMenuItem
+                      onSelect={handleLogout}
+                      className="cursor-pointer text-red-400 font-medium data-[highlighted]:bg-red-500/10 data-[highlighted]:text-red-400"
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
           </div>
         </nav>
       </header>
@@ -307,7 +357,7 @@ function LandingPage() {
               </p>
             </div>
 
-            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
               {features.map((feature) => (
                 <FeatureCard key={feature.title} {...feature} />
               ))}

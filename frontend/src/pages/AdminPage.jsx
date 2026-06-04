@@ -16,8 +16,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import jsPDF from "jspdf";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -67,6 +74,31 @@ export default function AdminPage() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const user = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("user") || "null");
+      } catch (e) {
+        return null;
+      }
+    })();
+    if (!token) {
+      window.location.href = "/";
+      return;
+    }
+    if (user && user.role !== "ADMIN") {
+      window.location.href = "/dashboard";
+      return;
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/";
+  };
 
   useEffect(() => {
     // Clamp visible counts if dashboard data changes
@@ -205,6 +237,8 @@ export default function AdminPage() {
     return () => observer.disconnect();
   }, []);
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-card/30 md:flex">
@@ -261,16 +295,46 @@ export default function AdminPage() {
           <div className="mt-auto border-t border-border/60 p-3">
             <div className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-muted/40">
               <Avatar size="default">
-                <AvatarFallback>JC</AvatarFallback>
+                <AvatarImage
+                  src={user.picture || user.image || user.avatar}
+                  alt={user.name}
+                />
+
+                <AvatarFallback>
+                  {user?.name
+                    ?.split(" ")
+                    .map((s) => s[0])
+                    .slice(0, 2)
+                    .join("") || "U"}
+                </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">Admin</p>
-                <p className="truncate text-xs text-muted-foreground">admin@quicktake.app</p>
+                <p className="truncate text-sm font-medium">{(() => { try { const u = JSON.parse(localStorage.getItem("user")||"null"); return (u && u.name) || "Admin" } catch(e){ return "Admin" } })()}</p>
+                <p className="truncate text-xs text-muted-foreground">{(() => { try { const u = JSON.parse(localStorage.getItem("user")||"null"); return (u && u.email) || "" } catch(e){ return "" } })()}</p>
               </div>
-              <Button variant="ghost" size="icon-sm" className="shrink-0">
-                <Settings className="size-4" />
-                <span className="sr-only">Account settings</span>
-              </Button>
+              <div className="shrink-0">
+                <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 bg-muted/40 border-border/60 hover:bg-muted"
+                >
+                  <Settings className="size-4" />
+                  <span className="sr-only">Account settings</span>
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" sideOffset={8} className="w-auto min-w-0 p-1">
+                  <DropdownMenuItem
+                    onSelect={handleLogout}
+                    className="cursor-pointer text-red-400 font-medium data-[highlighted]:bg-red-500/10 data-[highlighted]:text-red-400"
+                  >
+                    Logout
+                  </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+              </div>
             </div>
           </div>
         </div>
