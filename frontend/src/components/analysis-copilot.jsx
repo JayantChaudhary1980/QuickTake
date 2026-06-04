@@ -67,7 +67,7 @@ export function AnalysisCopilot({ analysisId }) {
     <Card className="flex h-full flex-col border-border/60 overflow-hidden">
       <CardHeader className="shrink-0 border-b border-border/60 pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <MessageSquare className="size-5 text-violet-400" />
+          <MessageSquare className="size-5 text-violet-600 dark:text-violet-400" />
           Ask QuickTake
         </CardTitle>
         <CardDescription>

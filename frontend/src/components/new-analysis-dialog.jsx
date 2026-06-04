@@ -86,7 +86,7 @@ export function NewAnalysisDialog({ open, onOpenChange }) {
                   "flex min-h-36 flex-col items-start gap-3 rounded-xl border p-5 text-left transition-colors",
                   "hover:border-violet-500/40 hover:bg-muted/50",
                   isSelected
-                    ? "border-violet-500 bg-violet-500/10 ring-2 ring-violet-500/30"
+                    ? "border-violet-500 bg-violet-600/15 dark:bg-violet-500/10 ring-2 ring-violet-500/30"
                     : "border-border/60 bg-card"
                 )}
               >
@@ -94,7 +94,7 @@ export function NewAnalysisDialog({ open, onOpenChange }) {
                   className={cn(
                     "flex size-10 items-center justify-center rounded-lg",
                     isSelected
-                      ? "bg-violet-500/20 text-violet-400"
+                      ? "bg-violet-500/20 text-violet-600 dark:text-violet-400"
                       : "bg-muted text-muted-foreground"
                   )}
                 >

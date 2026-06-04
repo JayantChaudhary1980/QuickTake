@@ -70,7 +70,7 @@ function PublicAnalysisPage() {
               <Card className="border-border/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <Sparkles className="size-5 text-violet-400" />
+                    <Sparkles className="size-5 text-violet-600 dark:text-violet-400" />
                     Summary
                   </CardTitle>
                 </CardHeader>
@@ -85,7 +85,7 @@ function PublicAnalysisPage() {
                 <Card className="border-border/60">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <ListChecks className="size-5 text-violet-400" />
+                      <ListChecks className="size-5 text-violet-600 dark:text-violet-400" />
                       Key Points
                     </CardTitle>
                   </CardHeader>
@@ -105,7 +105,7 @@ function PublicAnalysisPage() {
                 <Card className="border-border/60">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <FileText className="size-5 text-violet-400" />
+                      <FileText className="size-5 text-violet-600 dark:text-violet-400" />
                       Transcript
                     </CardTitle>
                   </CardHeader>

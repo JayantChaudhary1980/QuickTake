@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Logo } from "@/components/logo";
 import {
   Users,
   FileText,
@@ -243,11 +244,8 @@ export default function AdminPage() {
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border/60 bg-card/30 md:flex">
         <div className="flex flex-col h-full">
-          <div className="flex items-center gap-2 px-4 py-5">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Database className="size-4" />
-            </span>
-            <span className="text-lg font-semibold tracking-tight">QuickTake</span>
+          <div className="px-4 py-5">
+            <Logo />
           </div>
 
           <nav className="mt-4 flex flex-col gap-1 px-3">
@@ -513,7 +511,7 @@ export default function AdminPage() {
                       <div className="rounded-md border border-border/40 bg-card/30 p-3">
                         <p className="text-sm text-muted-foreground">Backend Status</p>
                         <div className="mt-2 flex items-center gap-2">
-                          <span className="rounded-full bg-emerald-600/20 text-emerald-400 px-2 py-0.5 text-xs">Healthy</span>
+                          <span className="rounded-full bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-xs">Healthy</span>
                         </div>
                       </div>
                       <div className="rounded-md border border-border/40 bg-card/30 p-3">
@@ -552,10 +550,10 @@ export default function AdminPage() {
                       ))
                     ) : (
                       [
-                        { id: "apiTotal", icon: Activity, label: "API Requests Total", value: dashboard?.apiRequestsTotal ?? 0, color: "text-sky-400" },
-                        { id: "tokens", icon: PieIcon, label: "Total Tokens Used", value: dashboard?.totalTokensUsed ?? 0, color: "text-violet-400" },
+                        { id: "apiTotal", icon: Activity, label: "API Requests Total", value: dashboard?.apiRequestsTotal ?? 0, color: "text-sky-600 dark:text-sky-400" },
+                        { id: "tokens", icon: PieIcon, label: "Total Tokens Used", value: dashboard?.totalTokensUsed ?? 0, color: "text-violet-600 dark:text-violet-400" },
                         { id: "failed", icon: AlertCircle, label: "Failed Requests", value: dashboard?.failedApiRequests ?? 0, color: "text-red-400" },
-                        { id: "success", icon: CheckCircle, label: "Success Rate", value: `${Math.round(((dashboard?.successfulApiRequests || 0) / Math.max(1, (dashboard?.apiRequestsTotal || 0))) * 100)}%`, color: "text-emerald-400" },
+                        { id: "success", icon: CheckCircle, label: "Success Rate", value: `${Math.round(((dashboard?.successfulApiRequests || 0) / Math.max(1, (dashboard?.apiRequestsTotal || 0))) * 100)}%`, color: "text-emerald-600 dark:text-emerald-400" },
                       ].map((q) => (
                         <div key={q.id} className="flex items-center justify-between rounded-md border border-border/40 bg-card/30 p-3">
                           <div className="flex items-center gap-3">
@@ -689,7 +687,12 @@ export default function AdminPage() {
                       ))
                     ) : (
                       (dashboard?.recentAnalyses || []).slice(0, visibleAnalyses).map((a, idx) => {
-                        const typeColor = a.sourceType === "UPLOAD" ? "bg-violet-600/10 text-violet-300" : a.sourceType === "YOUTUBE" ? "bg-sky-600/10 text-sky-300" : "bg-emerald-600/10 text-emerald-300";
+                        const typeColor =
+                          a.sourceType === "UPLOAD"
+                            ? "bg-purple-100 text-purple-800 dark:bg-violet-600/15 dark:text-violet-400"
+                            : a.sourceType === "YOUTUBE"
+                            ? "bg-blue-100 text-blue-800 dark:bg-sky-600/15 dark:text-sky-400"
+                            : "bg-green-100 text-green-800 dark:bg-emerald-600/15 dark:text-emerald-400";
                         return (
                           <div key={a._id || idx} className="grid grid-cols-[3fr_1fr_1fr_1fr_1fr_1fr] items-center gap-3 px-6 py-3 hover:bg-muted/30">
                             <div className="font-medium">{a.title}</div>
@@ -699,7 +702,9 @@ export default function AdminPage() {
                             </div>
                             <div className="text-sm text-muted-foreground">{formatDuration(a.durationSeconds || 0)}</div>
                             <div>
-                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${a.status === "COMPLETED" ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400"}`}>
+                              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${a.status === "COMPLETED"
+                                ? "bg-green-100 text-green-800 dark:bg-emerald-500/15 dark:text-emerald-400"
+                                : "bg-yellow-100 text-yellow-800 dark:bg-amber-500/15 dark:text-amber-400"}`}>
                                 {a.status === "COMPLETED" ? "Completed" : "Processing"}
                               </span>
                             </div>

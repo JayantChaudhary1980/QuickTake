@@ -174,7 +174,7 @@ function UploadPage() {
                 className={cn(
                   "flex min-h-48 flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-6 text-center transition-colors sm:min-h-56",
                   isDragging
-                    ? "border-violet-500 bg-violet-500/10"
+                    ? "border-violet-500 bg-violet-600/15 dark:bg-violet-500/10"
                     : "border-border/60 bg-muted/20 hover:border-violet-500/40 hover:bg-muted/40"
                 )}
               >
@@ -206,7 +206,7 @@ function UploadPage() {
 
             {file && (
               <div className="flex gap-3 rounded-lg border border-border/60 bg-muted/30 p-4">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-violet-400">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-600/30 dark:bg-violet-600/20 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400">
                   <FileAudio className="size-5" />
                 </span>
                 <div className="min-w-0 flex-1 space-y-1 text-sm">

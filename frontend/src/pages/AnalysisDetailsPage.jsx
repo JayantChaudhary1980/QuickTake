@@ -336,7 +336,7 @@ function AnalysisDetailsPage() {
             <div className="mb-6">
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-3">
-                  <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-300">
+                  <span className="rounded-full border border-violet-500/20 bg-violet-600/15 dark:bg-violet-500/10 px-3 py-1 text-violet-300">
                     {analysis.sourceType}
                   </span>
 
@@ -410,13 +410,13 @@ function AnalysisDetailsPage() {
               )}
             </div>
 
-            <div className="flex flex-col gap-6 lg:flex-row lg:h-[calc(100vh-12rem)]">
+            <div className="flex flex-col gap-6 lg:flex-row">
               <main className="min-w-0 flex-1 space-y-6">
                 <Card className="border-border/60">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between gap-2 text-lg">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="size-5 text-violet-400" />
+                        <Sparkles className="size-5 text-violet-600 dark:text-violet-400" />
                         Summary
                       </div>
                       <Button variant="ghost" size="sm" onClick={copySummary}>
@@ -436,7 +436,7 @@ function AnalysisDetailsPage() {
                   <Card className="border-border/60">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-lg">
-                        <ListChecks className="size-5 text-violet-400" />
+                        <ListChecks className="size-5 text-violet-600 dark:text-violet-400" />
                         Key Points
                       </CardTitle>
                       <CardDescription>
@@ -464,7 +464,7 @@ function AnalysisDetailsPage() {
                   <Card className="border-border/60">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 text-lg">
-                        <CheckCircle2 className="size-5 text-violet-400" />
+                        <CheckCircle2 className="size-5 text-violet-600 dark:text-violet-400" />
                         Action Items
                       </CardTitle>
                       <CardDescription>Follow-ups and next steps</CardDescription>
@@ -494,7 +494,7 @@ function AnalysisDetailsPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between gap-2 text-lg">
                       <div className="flex items-center gap-2">
-                        <FileText className="size-5 text-violet-400" />
+                        <FileText className="size-5 text-violet-600 dark:text-violet-400" />
                         Transcript
                       </div>
                       <Button variant="ghost" size="sm" onClick={copyTranscript}>
@@ -514,7 +514,7 @@ function AnalysisDetailsPage() {
                 </Card>
               </main>
 
-              <aside className="w-full shrink-0 lg:w-[360px] lg:h-full overflow-hidden">
+              <aside className="w-full shrink-0 lg:w-[360px] lg:h-[580px] overflow-hidden">
                 <AnalysisCopilot analysisId={id} />
               </aside>
             </div>

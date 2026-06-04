@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Logo } from "@/components/logo";
 import {
   Clock,
   History,
@@ -94,7 +95,7 @@ function DashboardPage() {
     localStorage.getItem("activeNav") || "dashboard"
   );
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [backendOk, setBackendOk] = useState(false);
+  const [backendStatus, setBackendStatus] = useState("CHECKING");
   const [analyses, setAnalyses] = useState([]);
   const [newAnalysisOpen, setNewAnalysisOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -165,20 +166,12 @@ function DashboardPage() {
   }, [activeNav]);
 
   useEffect(() => {
-    getHealth()
-      .then((data) => {
-        if (data.status === "ok") {
-          setBackendOk(true);
-        }
-      })
-      .catch(() => {
-        setBackendOk(false);
-      });
-  
     fetchAnalyses();
+
     (async () => {
       try {
         const s = await getAnalysisStats();
+
         setStats({
           totalAnalyses: s.totalAnalyses ?? 0,
           thisWeek: s.thisWeek ?? 0,
@@ -188,6 +181,28 @@ function DashboardPage() {
         console.error("Failed to load analysis stats:", err);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:8000/api/health"
+        );
+
+        if (!res.ok) throw new Error();
+
+        setBackendStatus("OK");
+      } catch {
+        setBackendStatus("OFFLINE");
+      }
+    };
+
+    checkBackend();
+
+    const interval = setInterval(checkBackend, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   console.log("Analyses State:", analyses);
@@ -318,7 +333,7 @@ function DashboardPage() {
                             className="group block"
                           >
                             <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] items-center border-b border-border/40 px-6 py-4 transition-colors hover:bg-muted/40">
-                              <div className="truncate font-medium transition-colors group-hover:text-violet-400">{analysis.title}</div>
+                              <div className="truncate font-medium transition-colors group-hover:text-violet-600 dark:text-violet-400">{analysis.title}</div>
                               <div className="text-muted-foreground">
                                 {analysis.sourceType === "YOUTUBE"
                                   ? "YouTube"
@@ -327,7 +342,7 @@ function DashboardPage() {
                                   : "Upload"}
                               </div>
                               <div>
-                                <span className={`rounded-full px-2 py-1 text-xs font-medium ${analysis.status === "COMPLETED" ? "bg-emerald-500/15 text-emerald-400" : "bg-amber-500/15 text-amber-400"}`}>
+                                <span className={`rounded-full px-2 py-1 text-xs font-medium ${analysis.status === "COMPLETED" ? "bg-emerald-600/20 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-amber-500/15 text-amber-400"}`}>
                                   {analysis.status === "COMPLETED" ? "Complete" : "Processing"}
                                 </span>
                               </div>
@@ -345,9 +360,29 @@ function DashboardPage() {
             ) : (
               // Default Dashboard View (unchanged)
               <>
-                {backendOk && (
-                  <p className="text-sm font-medium text-emerald-500">Backend Status: OK</p>
-                )}
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      backendStatus === "OK"
+                        ? "bg-emerald-400"
+                        : backendStatus === "CHECKING"
+                        ? "bg-yellow-400"
+                        : "bg-red-400"
+                    }`}
+                  />
+
+                  <p
+                    className={`font-medium ${
+                      backendStatus === "OK"
+                        ? "text-emerald-400"
+                        : backendStatus === "CHECKING"
+                        ? "text-yellow-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    Backend Status: {backendStatus}
+                  </p>
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   <StatCard label="Total analyses" value={stats.totalAnalyses} />
@@ -410,7 +445,7 @@ function DashboardPage() {
                     )}
                   </div>
                   <div className="mt-8 flex justify-center">
-                    <button onClick={() => setActiveNav("history")} className="text-sm font-medium text-white transition-colors hover:text-violet-400">View all analyses →</button>
+                    <button onClick={() => setActiveNav("history")} className="text-sm font-medium text-black transition-colors hover:text-violet-600 dark:text-white dark:hover:text-violet-400">View all analyses →</button>
                   </div>
                 </section>
               </>
@@ -445,11 +480,8 @@ function SidebarContent({
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
-      <div className="flex items-center gap-2 px-4 py-5">
-        <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Zap className="size-4" />
-        </span>
-        <span className="text-lg font-semibold tracking-tight">QuickTake</span>
+      <div className="px-4 py-5">
+        <Logo />
       </div>
 
       <div className="px-3">
@@ -626,7 +658,7 @@ function StatusBadge({ status }) {
         "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
         isProcessing
           ? "bg-amber-500/15 text-amber-400"
-          : "bg-emerald-500/15 text-emerald-400"
+          : "bg-emerald-600/20 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
       )}
     >
       {status}

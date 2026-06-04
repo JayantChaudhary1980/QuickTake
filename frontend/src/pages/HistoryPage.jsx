@@ -114,7 +114,7 @@ function HistoryPage() {
                     >
                     <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] items-center border-b border-border/40 px-6 py-4 transition-colors hover:bg-muted/40">
                         {/* Title */}
-                        <div className="truncate font-medium transition-colors group-hover:text-violet-400">
+                        <div className="truncate font-medium transition-colors group-hover:text-violet-600 dark:text-violet-400">
                         {analysis.title}
                         </div>
 
@@ -132,7 +132,7 @@ function HistoryPage() {
                         <span
                             className={`rounded-full px-2 py-1 text-xs font-medium ${
                             analysis.status === "COMPLETED"
-                                ? "bg-emerald-500/15 text-emerald-400"
+                                ? "bg-emerald-600/20 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
                                 : "bg-amber-500/15 text-amber-400"
                             }`}
                         >
