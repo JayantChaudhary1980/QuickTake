@@ -14,13 +14,11 @@ export const getDashboardStats = async (req, res) => {
 
     const recentUsersPromise = User.find()
       .sort({ createdAt: -1 })
-      .limit(5)
       .select("name email role createdAt")
       .lean();
 
     const recentAnalysesPromise = Analysis.find()
       .sort({ createdAt: -1 })
-      .limit(5)
       .populate("userId", "name")
       .select("title sourceType durationSeconds status createdAt userId")
       .lean();

@@ -39,6 +39,12 @@ export default function AdminPage() {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState("overview");
 
+  const INITIAL_ROWS = 5;
+  const LOAD_MORE_COUNT = 50;
+
+  const [visibleUsers, setVisibleUsers] = useState(INITIAL_ROWS);
+  const [visibleAnalyses, setVisibleAnalyses] = useState(INITIAL_ROWS);
+
   const overviewRef = React.useRef(null);
   const usersRef = React.useRef(null);
   const analysesRef = React.useRef(null);
@@ -61,6 +67,14 @@ export default function AdminPage() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    // Clamp visible counts if dashboard data changes
+    const usersTotal = (dashboard?.recentUsers || []).length;
+    const analysesTotal = (dashboard?.recentAnalyses || []).length;
+    if (visibleUsers > usersTotal) setVisibleUsers(Math.max(INITIAL_ROWS, usersTotal));
+    if (visibleAnalyses > analysesTotal) setVisibleAnalyses(Math.max(INITIAL_ROWS, analysesTotal));
+  }, [dashboard]);
 
   const handleExport = async () => {
     try {
@@ -521,7 +535,7 @@ export default function AdminPage() {
                         </div>
                       ))
                     ) : (
-                      (dashboard?.recentUsers || []).map((u, idx) => {
+                      (dashboard?.recentUsers || []).slice(0, visibleUsers).map((u, idx) => {
                         const initials = (u.name || "").split(" ").map(s => s[0]).slice(0,2).join("");
                         return (
                           <div key={u._id || idx} className="grid grid-cols-[2fr_2fr_1fr_1fr] items-center gap-3 px-6 py-3">
@@ -539,11 +553,47 @@ export default function AdminPage() {
                       })
                     )}
                   </div>
+                  {/* View More / Show Less buttons */}
+                  {!loading && (dashboard?.recentUsers || []).length > 0 && (
+                    <div className="flex items-center justify-end gap-3 px-6 py-3">
+                      {(dashboard?.recentUsers || []).length > visibleUsers && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setVisibleUsers((v) =>
+                              Math.min(
+                                v + LOAD_MORE_COUNT,
+                                (dashboard?.recentUsers || []).length
+                              )
+                            )
+                          }
+                        >
+                          View More
+                        </Button>
+                      )}
+
+                      {visibleUsers > INITIAL_ROWS && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setVisibleUsers(INITIAL_ROWS);
+                            usersRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
+                          }}
+                        >
+                          Show Less
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
-            </section>
-
+          </section>
             {/* Recent Analyses */}
             <section>
               <div ref={analysesRef}>
@@ -574,7 +624,7 @@ export default function AdminPage() {
                         </div>
                       ))
                     ) : (
-                      (dashboard?.recentAnalyses || []).map((a, idx) => {
+                      (dashboard?.recentAnalyses || []).slice(0, visibleAnalyses).map((a, idx) => {
                         const typeColor = a.sourceType === "UPLOAD" ? "bg-violet-600/10 text-violet-300" : a.sourceType === "YOUTUBE" ? "bg-sky-600/10 text-sky-300" : "bg-emerald-600/10 text-emerald-300";
                         return (
                           <div key={a._id || idx} className="grid grid-cols-[3fr_1fr_1fr_1fr_1fr_1fr] items-center gap-3 px-6 py-3 hover:bg-muted/30">
@@ -595,6 +645,21 @@ export default function AdminPage() {
                       })
                     )}
                   </div>
+                {/* View More / Show Less buttons */}
+                {!loading && (dashboard?.recentAnalyses || []).length > 0 && (
+                  <div className="flex items-center justify-end gap-3 px-6 py-3">
+                    {((dashboard?.recentAnalyses || []).length > visibleAnalyses) && (
+                      <Button variant="ghost" size="sm" onClick={() => setVisibleAnalyses(v => Math.min(v + LOAD_MORE_COUNT, (dashboard?.recentAnalyses || []).length))}>
+                        View More
+                      </Button>
+                    )}
+                    {visibleAnalyses > INITIAL_ROWS && (
+                      <Button variant="ghost" size="sm" onClick={() => { setVisibleAnalyses(INITIAL_ROWS); analysesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>
+                        Show Less
+                      </Button>
+                    )}
+                  </div>
+                )}
                 </CardContent>
                 </Card>
               </div>
