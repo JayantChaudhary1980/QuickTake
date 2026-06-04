@@ -9,7 +9,6 @@ import {
   Plus,
   Search,
   Settings,
-  Zap,
 } from "lucide-react";
 
 import { ModeToggle } from "@/components/mode-toggle";
@@ -387,7 +386,7 @@ function DashboardPage() {
                 <div className="grid gap-4 sm:grid-cols-3">
                   <StatCard label="Total analyses" value={stats.totalAnalyses} />
                   <StatCard label="This week" value={stats.thisWeek} />
-                  <StatCard label="Hours saved" value={displayTime || 0} />
+                  <StatCard label="Time saved" value={displayTime || 0} />
                 </div>
 
                 <section>

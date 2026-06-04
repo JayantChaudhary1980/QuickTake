@@ -418,16 +418,17 @@ export const createYoutubeAnalysis = async (req, res) => {
           statusMessage: "Completed",
         });
       } catch (err) {
-        console.error("Background YouTube processing failed:", err);
-        try {
-          await Analysis.findByIdAndUpdate(placeholder._id, {
-            statusMessage: `Failed: ${err.message || "error"}`,
-            status: "PROCESSING",
-          });
-        } catch (e) {
-          console.error("Failed to update placeholder on error:", e);
+          console.error("Background YouTube processing failed:", err);
+
+          try {
+            await Analysis.findByIdAndUpdate(placeholder._id, {
+              status: "FAILED",
+              statusMessage: err.message || "Processing failed",
+            });
+          } catch (e) {
+            console.error("Failed to update placeholder on error:", e);
+          }
         }
-      }
     })();
   } catch (error) {
     console.error(error);

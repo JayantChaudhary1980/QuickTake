@@ -356,14 +356,50 @@ function AnalysisDetailsPage() {
                 </span>
               </div>
 
-              {analysis.status === "PROCESSING" && analysis.statusMessage && (
-                <div className="mt-2 text-sm text-muted-foreground">Status: {analysis.statusMessage}</div>
+              {analysis.status === "PROCESSING" && (
+                <div className="mt-4 flex items-center gap-3 rounded-lg border border-violet-500/20 bg-violet-500/10 px-4 py-3">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+
+                  <div>
+                    <p className="text-sm font-medium text-violet-400">
+                      Analysis in Progress
+                    </p>
+
+                    <p className="text-xs text-muted-foreground">
+                      {analysis.statusMessage || "Processing..."}
+                    </p>
+                  </div>
+                </div>
               )}
+
+              {analysis.status === "FAILED" && (
+                <div className="mt-4 flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3">
+                  <div className="h-3 w-3 rounded-full bg-red-500" />
+
+                  <div>
+                    <p className="text-sm font-medium text-red-400">
+                      Analysis Failed
+                    </p>
+
+                    <p className="text-xs text-muted-foreground">
+                      {analysis.statusMessage}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {!isEditing ? (
                 <div className="mt-4 flex items-center gap-3">
                   <h1 className="text-4xl font-bold tracking-tight">
                     {analysis.title}
                   </h1>
+
+                  {analysis.status === "FAILED" && (
+                    <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-medium text-red-400">
+                      Failed
+                    </span>
+                  )}
+
                   <Button
                     size="sm"
                     variant="outline"
@@ -377,19 +413,37 @@ function AnalysisDetailsPage() {
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
-                  <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="min-w-0" />
+                  <Input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="min-w-0"
+                  />
+
                   <Button
                     onClick={async () => {
                       if (isSavingTitle) return;
+
                       setIsSavingTitle(true);
+
                       try {
                         const updated = await renameAnalysis(id, editTitle.trim());
-                        setAnalysis((prev) => ({ ...prev, title: updated.title }));
+
+                        setAnalysis((prev) => ({
+                          ...prev,
+                          title: updated.title,
+                        }));
+
                         setIsEditing(false);
+
                         toast.success("Title updated");
                       } catch (err) {
                         console.error(err);
-                        toast.error(err instanceof Error ? err.message : "Failed to update title");
+
+                        toast.error(
+                          err instanceof Error
+                            ? err.message
+                            : "Failed to update title"
+                        );
                       } finally {
                         setIsSavingTitle(false);
                       }
@@ -398,6 +452,7 @@ function AnalysisDetailsPage() {
                   >
                     Save
                   </Button>
+
                   <Button
                     variant="ghost"
                     onClick={() => {
