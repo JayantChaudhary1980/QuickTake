@@ -5,13 +5,11 @@ import {
   Bot,
   FileText,
   LayoutDashboard,
-  Monitor,
   Sparkles,
   PlayCircle,
   Video,
   Phone,
   Mail,
-  Check,
 } from "lucide-react";
 
 import { ModeToggle } from "@/components/mode-toggle";
@@ -122,7 +120,7 @@ function LandingPage() {
                   size="large"
                   text="signin"
                   onSuccess={(credentialResponse) => {
-                    fetch("http://localhost:8000/api/auth/google", {
+                    fetch(`${import.meta.env.VITE_API_URL}/api/auth/google`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ credential: credentialResponse.credential }),

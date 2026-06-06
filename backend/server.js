@@ -33,13 +33,6 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.get("/api/protected", protect, (req, res) => {
-  res.json({
-    message: "Protected Route Accessed",
-    user: req.user,
-  });
-});
-
 app.get("/api/public/analyses/:id", getPublicAnalysis);
 
 app.listen(PORT, () => {

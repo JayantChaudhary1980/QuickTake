@@ -16,7 +16,7 @@ function HistoryPage() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:8000/api/analyses",
+        `${import.meta.env.VITE_API_URL}/api/analyses`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

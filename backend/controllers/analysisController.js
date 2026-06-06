@@ -410,7 +410,6 @@ export const createYoutubeAnalysis = async (req, res) => {
         let summary = "";
         let keyPoints = [];
         let actionItems = [];
-
         try {
           const result = await generateSummary(transcript, {
             userId: req.user.userId,

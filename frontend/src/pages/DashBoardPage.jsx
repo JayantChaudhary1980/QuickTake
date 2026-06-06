@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/logo";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 import {
   Clock,
   History,
@@ -37,44 +38,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { getHealth, getAnalysisStats } from "@/services/api";
+import { getAnalysisStats } from "@/services/api";
 import { formatDuration } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "history", label: "History", icon: History },
-];
-
-const recentAnalyses = [
-  {
-    id: "1",
-    title: "Q2 Roadmap Review",
-    type: "Meeting",
-    time: "2 hours ago",
-    status: "Complete",
-  },
-  {
-    id: "2",
-    title: "Product Demo Walkthrough",
-    type: "Screen + Video",
-    time: "Yesterday",
-    status: "Complete",
-  },
-  {
-    id: "3",
-    title: "Customer Discovery Call",
-    type: "Meeting",
-    time: "Mar 28, 2026",
-    status: "Processing",
-  },
-  {
-    id: "4",
-    title: "YouTube: AI Tools Overview",
-    type: "YouTube",
-    time: "Mar 26, 2026",
-    status: "Complete",
-  },
 ];
 
 function DashboardPage() {
@@ -110,7 +80,7 @@ function DashboardPage() {
       const token = localStorage.getItem("token");
   
       const response = await fetch(
-        "http://localhost:8000/api/analyses",
+        `${API_URL}/api/analyses`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -119,9 +89,7 @@ function DashboardPage() {
       );
   
       const data = await response.json();
-  
-      console.log("Analyses:", data);
-  
+
       setAnalyses(data);
     } catch (error) {
       console.error(error);
@@ -133,7 +101,7 @@ function DashboardPage() {
       const token = localStorage.getItem("token");
   
       const response = await fetch(
-        "http://localhost:8000/api/analyses",
+        `${API_URL}/api/analyses`,
         {
           method: "POST",
           headers: {
@@ -148,8 +116,6 @@ function DashboardPage() {
       );
   
       const data = await response.json();
-  
-      console.log("Analysis Created:", data);
 
       fetchAnalyses();
   
@@ -186,7 +152,7 @@ function DashboardPage() {
     const checkBackend = async () => {
       try {
         const res = await fetch(
-          "http://localhost:8000/api/health"
+          `${import.meta.env.VITE_API_URL}/api/health`
         );
 
         if (!res.ok) throw new Error();
@@ -203,8 +169,6 @@ function DashboardPage() {
 
     return () => clearInterval(interval);
   }, []);
-
-  console.log("Analyses State:", analyses);
 
   const displayTime =
     stats.hoursSaved < 1
@@ -341,8 +305,20 @@ function DashboardPage() {
                                   : "Upload"}
                               </div>
                               <div>
-                                <span className={`rounded-full px-2 py-1 text-xs font-medium ${analysis.status === "COMPLETED" ? "bg-emerald-600/20 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-amber-500/15 text-amber-400"}`}>
-                                  {analysis.status === "COMPLETED" ? "Complete" : "Processing"}
+                                <span
+                                  className={`rounded-full px-2 py-1 text-xs font-medium ${
+                                    analysis.status === "COMPLETED"
+                                      ? "bg-emerald-600/20 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                                      : analysis.status === "FAILED"
+                                      ? "bg-red-500/15 text-red-400"
+                                      : "bg-amber-500/15 text-amber-400"
+                                  }`}
+                                >
+                                  {analysis.status === "COMPLETED"
+                                    ? "Complete"
+                                    : analysis.status === "FAILED"
+                                    ? "Failed"
+                                    : "Processing"}
                                 </span>
                               </div>
                               <div className="text-muted-foreground">{createdDate.toLocaleDateString()}</div>
@@ -425,7 +401,15 @@ function DashboardPage() {
                             <CardHeader className="pb-2">
                               <div className="flex items-start justify-between gap-2">
                                 <CardTitle className="text-base">{analysis.title}</CardTitle>
-                                <StatusBadge status={analysis.status === "COMPLETED" ? "Complete" : "Processing"} />
+                                <StatusBadge
+                                  status={
+                                    analysis.status === "COMPLETED"
+                                      ? "Complete"
+                                      : analysis.status === "FAILED"
+                                      ? "Failed"
+                                      : "Processing"
+                                  }
+                                />
                               </div>
                               <CardDescription>{analysis.sourceType}</CardDescription>
                             </CardHeader>
@@ -649,15 +633,15 @@ function StatCard({ label, value }) {
 }
 
 function StatusBadge({ status }) {
-  const isProcessing = status === "Processing";
-
   return (
     <span
       className={cn(
         "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium",
-        isProcessing
-          ? "bg-amber-500/15 text-amber-400"
-          : "bg-emerald-600/20 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+        status === "Complete"
+          ? "bg-emerald-600/20 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+          : status === "Failed"
+          ? "bg-red-500/15 text-red-400"
+          : "bg-amber-500/15 text-amber-400"
       )}
     >
       {status}

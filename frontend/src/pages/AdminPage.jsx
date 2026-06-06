@@ -7,11 +7,8 @@ import {
   Activity,
   LayoutDashboard,
   Settings,
-  User,
-  Database,
   PieChart as PieIcon,
   UserCheck,
-  ShieldCheck,
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
@@ -35,7 +32,6 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDuration } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 import { getAdminDashboard } from "@/services/api";
 import { PieChart as RechPieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
