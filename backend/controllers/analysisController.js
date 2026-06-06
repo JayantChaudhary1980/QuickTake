@@ -69,9 +69,6 @@ export const askAnalysis = async (req, res) => {
     const { id } = req.params;
     const question = req.body.question?.trim();
 
-    console.log("Ask analysisId:", id);
-    console.log("Ask question received:", question);
-
     if (!question) {
       return res.status(400).json({ message: "Question is required" });
     }
@@ -94,11 +91,6 @@ export const askAnalysis = async (req, res) => {
         message: "This analysis has no transcript to ask about",
       });
     }
-
-    console.log(
-      "Ask transcript length from DB:",
-      analysis.transcript.length
-    );
 
     const answer = await askAnalysisQuestion(analysis.transcript, question, {
       userId: req.user.userId,
@@ -124,9 +116,6 @@ export const uploadAnalysis = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-
-    console.log("File received:", req.file.originalname);
-    console.log("Size:", req.file.size);
 
     // Attempt to determine duration using ffprobe
     let durationSeconds = 0;
@@ -167,16 +156,12 @@ export const uploadAnalysis = async (req, res) => {
       { userId: req.user.userId }
     );
 
-    console.log("Transcript length:", transcript.length);
-
     let summary = "";
     let keyPoints = [];
     let actionItems = [];
 
     try {
-      console.log("Calling Summary...");
       const result = await generateSummary(transcript, { userId: req.user.userId });
-      console.log("Gemini result:", result);
 
       summary = result.summary;
       keyPoints = result.keyPoints;
