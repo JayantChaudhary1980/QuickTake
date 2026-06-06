@@ -39,7 +39,7 @@ export async function transcribeAudio(buffer, originalname, mimetype, options = 
       console.error("Failed to record usage for transcription:", e);
     }
 
-    return transcription.text ?? "";
+    return transcription.text?.trim() ?? "";
   } catch (err) {
     try {
       await recordApiUsage({
@@ -55,4 +55,3 @@ export async function transcribeAudio(buffer, originalname, mimetype, options = 
     throw err;
   }
 }
-

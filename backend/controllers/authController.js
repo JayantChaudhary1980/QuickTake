@@ -44,8 +44,10 @@ export const googleLogin = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.error("Google login error:", error);
+
     res.status(500).json({
-      message: error.message,
+      message: "Authentication failed",
     });
   }
 };

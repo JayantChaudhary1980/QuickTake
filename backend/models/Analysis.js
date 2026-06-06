@@ -56,7 +56,7 @@ const analysisSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["PROCESSING", "COMPLETED"],
+      enum: ["PROCESSING", "COMPLETED", "FAILED"],
       default: "PROCESSING",
     },
   },

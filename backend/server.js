@@ -7,7 +7,6 @@ import protect from "./middleware/authMiddleware.js";
 import analysisRoutes from "./routes/analysisRoutes.js";
 import { getPublicAnalysis } from "./controllers/analysisController.js";
 import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 
 
@@ -22,7 +21,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/analyses", analysisRoutes);
 app.use("/api/admin", adminRoutes);

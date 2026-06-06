@@ -13,9 +13,27 @@ import { execFileSync } from "child_process";
 
 export const createAnalysis = async (req, res) => {
   try {
+    const title = req.body.title?.trim();
+
+    if (!title) {
+      if (title.length > 200) {
+        return res.status(400).json({
+          message: "Title too long",
+        });
+      }
+      return res.status(400).json({
+        message: "Title is required",
+      });
+    }
+
+    if (title.length > 200) {
+      return res.status(400).json({
+        message: "Title too long",
+      });
+    }
     const analysis = await Analysis.create({
       userId: req.user.userId,
-      title: req.body.title,
+      title: title,
       sourceType: req.body.sourceType,
       durationSeconds: 0,
     });
@@ -107,6 +125,11 @@ export const askAnalysis = async (req, res) => {
 export const uploadAnalysis = async (req, res) => {
   try {
     const title = req.body.title?.trim();
+    if (title.length > 200) {
+      return res.status(400).json({
+        message: "Title too long",
+      }); 
+    }
     const sourceType = req.body.sourceType === "LIVE_CAPTURE" ? "LIVE_CAPTURE" : "UPLOAD";
 
     if (!title) {
@@ -261,9 +284,11 @@ export const shareAnalysis = async (req, res) => {
     analysis.isPublic = true;
     await analysis.save();
 
-    const host = process.env.PUBLIC_HOST || "http://localhost:3000";
+    const host = process.env.PUBLIC_HOST;
+    if (!host) {
+      throw new Error("PUBLIC_HOST not configured");
+    }
     const shareUrl = `${host}/share/${analysis._id}`;
-
     res.json({ url: shareUrl });
   } catch (error) {
     console.error("Share analysis error:", error);
@@ -332,6 +357,11 @@ export const createYoutubeAnalysis = async (req, res) => {
     const { title, url } = req.body;
 
     if (!title?.trim()) {
+      if (title.trim().length > 200) {
+      return res.status(400).json({
+        message: "Title too long",
+      });
+      }
       return res.status(400).json({
         message: "Title is required",
       });

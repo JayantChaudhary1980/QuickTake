@@ -49,14 +49,7 @@ function extractJson(text) {
 export async function generateSummary(transcript, options = {}) {
   const groq = getGroqClient();
 
-  const transcriptForPrompt =
-    truncateTranscript(transcript);
-
-  console.log("Generating summary...");
-  console.log(
-    "Transcript length:",
-    transcriptForPrompt.length
-  );
+  const transcriptForPrompt = truncateTranscript(transcript);
 
   let completion;
   try {
