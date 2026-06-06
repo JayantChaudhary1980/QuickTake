@@ -534,7 +534,7 @@ function LandingPage() {
                       Visit my Portfolio
                       </p>
                       <p className="text-xs text-muted-foreground">
-                      Projects & Experience
+                      Share Your Feedback
                       </p>
                   </div>
                   </a>

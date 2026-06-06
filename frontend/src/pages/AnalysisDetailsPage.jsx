@@ -562,7 +562,9 @@ function AnalysisDetailsPage() {
                   <CardContent className="pt-6">
                     <div className="max-h-[28rem] overflow-y-auto rounded-lg border border-border/60 bg-muted/20 p-4 lg:max-h-none">
                       <p className="whitespace-pre-wrap text-[15px] leading-8">
-                        {analysis.transcript && analysis.transcript.trim() ? analysis.transcript : "Transcript not available."}
+                        {analysis.transcript?.trim()
+                          ? analysis.transcript.trim()
+                          : "Transcript not available."}
                       </p>
                     </div>
                   </CardContent>

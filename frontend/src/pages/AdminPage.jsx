@@ -278,16 +278,6 @@ export default function AdminPage() {
                 <span>Analyses</span>
               </div>
             </button>
-
-            <button
-              disabled
-              className="w-full text-left rounded-md px-3 py-2 text-sm font-medium opacity-50"
-            >
-              <div className="flex items-center gap-3">
-                <Settings className="size-4" />
-                <span>Settings</span>
-              </div>
-            </button>
           </nav>
 
           <div className="mt-auto border-t border-border/60 p-3">
