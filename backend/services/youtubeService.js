@@ -5,7 +5,7 @@ export async function downloadYoutubeAudio(url) {
   // First fetch metadata to get duration. Support multiple metadata shapes.
   let durationSeconds = 0;
   try {
-    const info = await ytDlp(url, { dumpSingleJson: true, jsRuntimes: "node" });
+    const info = await ytDlp(url, { dumpSingleJson: true, jsRuntimes: "node" , cookies: "./cookies.txt" });
     if (info) {
       // common fields: duration, duration_seconds, or entries[0].duration
       if (typeof info.duration !== "undefined") {
@@ -27,6 +27,7 @@ export async function downloadYoutubeAudio(url) {
     audioFormat: "mp3",
     output,
     jsRuntimes: "node",
+    cookies: "./cookies.txt",
   });
 
   const buffer = fs.readFileSync(output);

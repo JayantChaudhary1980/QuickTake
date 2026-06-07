@@ -9,6 +9,14 @@ import { getPublicAnalysis } from "./controllers/analysisController.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 
+import fs from 'fs';
+
+if (process.env.YOUTUBE_COOKIES_BASE64) {
+  fs.writeFileSync(
+    './cookies.txt',
+    Buffer.from(process.env.YOUTUBE_COOKIES_BASE64, 'base64').toString('utf-8')
+  );
+}
 
 dotenv.config();
 
