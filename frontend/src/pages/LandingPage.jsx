@@ -186,14 +186,14 @@ function LandingPage() {
               Upload, capture, or analyze content from meetings, recordings, YouTube videos, and live sessions, then turn it into summaries, insights, and AI-powered conversations.
             </p>
 
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg" asChild className="shadow-sm hover:shadow-md transition">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3">
+              <Button size="lg" asChild className="bg-white text-black px-8 py-6 text-lg [animation:googleGlow_4s_ease-in-out_infinite]">
                 <Link to="/dashboard" className="flex items-center gap-3">
                   Start for free
                   <LayoutDashboard className="size-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="hover:bg-muted/10">
+              <Button size="lg" variant="outline" asChild className="mt-5 hover:bg-muted/10">
                 <a href="#features">See how it works</a>
               </Button>
             </div>
@@ -210,8 +210,8 @@ function LandingPage() {
                   <FileText className="size-4" />
                 </span>
                 <div>
-                  <div className="text-sm font-medium">11+ Analyses Processed</div>
-                  <div className="text-xs text-muted-foreground">Real usage examples</div>
+                  <div className="text-sm font-medium">Smart Transcripts</div>
+                  <div className="text-xs text-muted-foreground">Searchable and conversational</div>
                 </div>
               </CardContent>
             </Card>
@@ -235,7 +235,7 @@ function LandingPage() {
                 </span>
                 <div>
                   <div className="text-sm font-medium">AI Powered Summaries</div>
-                  <div className="text-xs text-muted-foreground">Concise, shareable notes</div>
+                  <div className="text-xs text-muted-foreground">Actionable, structured takeaways</div>
                 </div>
               </CardContent>
             </Card>
