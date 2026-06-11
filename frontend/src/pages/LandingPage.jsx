@@ -187,11 +187,23 @@ function LandingPage() {
             </p>
 
             <div className="mt-8 flex flex-col items-center justify-center gap-3">
-              <Button size="lg" asChild className="bg-white text-black px-8 py-6 text-lg [animation:googleGlow_4s_ease-in-out_infinite]">
-                <Link to="/dashboard" className="flex items-center gap-3">
-                  Start for free
-                  <LayoutDashboard className="size-4" />
-                </Link>
+              <Button
+                size="lg"
+                className="bg-white text-black px-8 py-6 text-lg [animation:googleGlow_4s_ease-in-out_infinite]"
+                onClick={() => {
+                  if (token) {
+                    window.location.href = "/dashboard";
+                  } else {
+                    alert("Please sign in with Google to continue");
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+              >
+                Start for free
+                <LayoutDashboard className="size-4" />
               </Button>
               <Button size="lg" variant="outline" asChild className="mt-5 hover:bg-muted/10">
                 <a href="#features">See how it works</a>
@@ -466,7 +478,15 @@ function LandingPage() {
               <ul className="mt-3 space-y-3 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                   <Phone className="size-4" />
-                  <span>+91 6375881436</span>
+                  {/* <span>+91 6375881436</span> */}
+                  <a
+                    href="https://personal-portfolio-nine-nu-61.vercel.app/#contact"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-foreground transition-colors"
+                  >
+                    Click here
+                  </a>
               </li>
 
               <li className="flex items-center gap-2">
