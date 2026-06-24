@@ -4,6 +4,12 @@
 
 ### Turn hours of content into minutes of understanding.
 
+<br>
+
+[![🌐 Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_QuickTake-blue?style=for-the-badge)](https://quicktake-frontend.onrender.com/)
+
+<br>
+
 AI-powered transcription, summarization, insight extraction, and conversational search for meetings, recordings, lectures, podcasts, and YouTube videos.
 
 <br>
