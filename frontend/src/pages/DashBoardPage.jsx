@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/logo";
+import { Briefcase } from "lucide-react";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 import {
   Clock,
@@ -520,6 +521,21 @@ function SidebarContent({
             </Button>
           );
         })}
+
+        <a
+          href="https://personal-portfolio-nine-nu-61.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 font-normal"
+          >
+            <Briefcase className="size-4 shrink-0" />
+            Contact Developer
+          </Button>
+        </a>
+
       </nav>
 
       <Separator className="my-4" />
