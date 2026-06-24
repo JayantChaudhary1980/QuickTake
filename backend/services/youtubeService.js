@@ -1,4 +1,6 @@
 import { YoutubeTranscript } from "youtube-transcript";
+import ytDlp from "yt-dlp-exec";
+import fs from "fs";
 
 function extractVideoId(url) {
   const match = url.match(
@@ -8,12 +10,13 @@ function extractVideoId(url) {
   return match[1];
 }
 
-export async function downloadYoutubeAudio(url) {
+// Method 1: youtube-transcript (captions)
+async function tryYoutubeTranscript(url) {
   const videoId = extractVideoId(url);
   const items = await YoutubeTranscript.fetchTranscript(videoId);
 
   if (!items || items.length === 0) {
-    throw new Error("No captions available for this video");
+    throw new Error("No captions available");
   }
 
   const transcriptText = items
@@ -25,9 +28,40 @@ export async function downloadYoutubeAudio(url) {
   const last = items[items.length - 1];
   const durationSeconds = Math.round((last.offset + last.duration) / 1000);
 
-  return {
-    type: "transcript",
-    transcriptText,
-    durationSeconds,
-  };
+  return { type: "transcript", transcriptText, durationSeconds };
+}
+
+// Method 2: yt-dlp with cookies
+async function tryYtDlp(url) {
+  let durationSeconds = 0;
+  try {
+    const info = await ytDlp(url, { dumpSingleJson: true, cookies: "./cookies.txt" });
+    durationSeconds = Math.round(Number(info?.duration) || 0);
+  } catch (err) {
+    console.warn("Failed to fetch metadata:", err.message);
+  }
+
+  const output = `temp-${Date.now()}.mp3`;
+  await ytDlp(url, {
+    extractAudio: true,
+    audioFormat: "mp3",
+    output,
+    cookies: "./cookies.txt",
+  });
+
+  const buffer = fs.readFileSync(output);
+  fs.unlinkSync(output);
+
+  return { type: "audio", buffer, filename: output, mimetype: "audio/mpeg", durationSeconds };
+}
+
+// Main export: captions first, cookies fallback
+export async function downloadYoutubeAudio(url) {
+  try {
+    console.log("Trying youtube-transcript...");
+    return await tryYoutubeTranscript(url);
+  } catch (err) {
+    console.warn("youtube-transcript failed, falling back to yt-dlp:", err.message);
+    return await tryYtDlp(url);
+  }
 }
