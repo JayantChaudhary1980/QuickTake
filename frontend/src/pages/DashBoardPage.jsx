@@ -222,11 +222,11 @@ function DashboardPage() {
           </Sheet>
 
           <div className="min-w-0 flex-1">
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-4xl">
               {activeNav === "history" ? "History" : "Dashboard"}
             </h1>
 
-            <p className="text-muted-foreground">
+            <p className="hidden text-xs text-muted-foreground sm:block sm:text-sm">
               {activeNav === "history"
                 ? "Browse all your previous analyses"
                 : "Manage analyses and review insights"}
@@ -253,7 +253,7 @@ function DashboardPage() {
                 <div className="mb-6 flex justify-between items-center">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="rounded-md bg-muted px-3 py-1 text-sm text-muted-foreground">
+                      <span className="sm:inline rounded-md bg-muted px-3 py-1 text-sm text-muted-foreground">
                         Showing {filteredAnalyses.length} analyses
                       </span>
                     </div>
@@ -267,7 +267,7 @@ function DashboardPage() {
                       placeholder="Search..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      className="h-10 w-80 rounded-md border border-border bg-background pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-ring"
+                      className="h-8 w-40 sm:h-10 sm:w-80 rounded-md border border-border bg-background pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
@@ -278,14 +278,14 @@ function DashboardPage() {
                 ) : (
                   <Card>
                     <CardContent className="p-0">
-                      <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] border-b border-border px-6 py-4 text-sm font-medium text-muted-foreground">
-                        <div>Title</div>
-                        <div>Type</div>
-                        <div>Status</div>
-                        <div>Date</div>
-                        <div>Time</div>
-                        <div>Duration</div>
-                      </div>
+                      <div className="grid grid-cols-[2fr_1fr] sm:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] border-b border-border px-4 sm:px-6 py-4 text-sm font-medium text-muted-foreground">
+                      <div>Title</div>
+                      <div className="hidden sm:block">Type</div>
+                      <div className="hidden sm:block">Status</div>
+                      <div>Date</div>
+                      <div className="hidden sm:block">Time</div>
+                      <div className="hidden sm:block">Duration</div>
+                    </div>
 
                       {filteredAnalyses.map((analysis) => {
                         const createdDate = new Date(analysis.createdAt);
@@ -295,16 +295,16 @@ function DashboardPage() {
                             to={`/analysis/${analysis._id}`}
                             className="group block"
                           >
-                            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] items-center border-b border-border/40 px-6 py-4 transition-colors hover:bg-muted/40">
+                            <div className="grid grid-cols-[2fr_1fr] sm:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] items-center border-b border-border/40 px-4 sm:px-6 py-3 sm:py-4 ...">
                               <div className="truncate font-medium transition-colors group-hover:text-violet-600 dark:text-violet-400">{analysis.title}</div>
-                              <div className="text-muted-foreground">
+                              <div className="hidden sm:block text-muted-foreground">
                                 {analysis.sourceType === "YOUTUBE"
                                   ? "YouTube"
                                   : analysis.sourceType === "LIVE_CAPTURE"
                                   ? "Live Capture"
                                   : "Upload"}
                               </div>
-                              <div>
+                              <div className="hidden sm:block">
                                 <span
                                   className={`rounded-full px-2 py-1 text-xs font-medium ${
                                     analysis.status === "COMPLETED"
@@ -322,8 +322,8 @@ function DashboardPage() {
                                 </span>
                               </div>
                               <div className="text-muted-foreground">{createdDate.toLocaleDateString()}</div>
-                              <div className="text-muted-foreground">{createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
-                              <div className="text-muted-foreground">{formatDuration(analysis.durationSeconds || 0)}</div>
+                              <div className="hidden sm:block text-muted-foreground">{createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+                              <div className="hidden sm:block text-muted-foreground">{formatDuration(analysis.durationSeconds || 0)}</div>
                             </div>
                           </Link>
                         );
@@ -359,7 +359,7 @@ function DashboardPage() {
                   </p>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4">
                   <StatCard label="Total analyses" value={stats.totalAnalyses} />
                   <StatCard label="This week" value={stats.thisWeek} />
                   <StatCard label="Time saved" value={displayTime || 0} />
@@ -617,13 +617,12 @@ function SidebarContent({
 function StatCard({ label, value }) {
   return (
     <Card className="border-border/60 bg-card/50">
-      <CardContent className="py-2 px-6">
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">
+      <CardContent className="px-2 py-2 sm:px-6">
+        <div className="space-y-1 sm:space-y-3">
+          <p className="text-xs text-muted-foreground sm:text-sm">
             {label}
           </p>
-
-          <h3 className="text-4xl font-bold tracking-tight">
+          <h3 className="text-2xl font-bold tracking-tight sm:text-4xl">
             {value}
           </h3>
         </div>

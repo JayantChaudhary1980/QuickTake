@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, MessageSquare, Send } from "lucide-react";
+import { Loader2, MessageSquare, Send, Copy } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +16,9 @@ import { askAnalysis } from "@/services/api";
 import { cn } from "@/lib/utils";
 
 const SUGGESTION_CHIPS = [
-  "What decisions were made?",
-  "Summarize in 3 bullets",
-  "What are the action items?",
+  "Explain the main idea in simple terms",
+  "Create revision notes from this",
+  "Quiz me on this topic",
 ];
 
 export function AnalysisCopilot({ analysisId }) {
@@ -65,8 +66,8 @@ export function AnalysisCopilot({ analysisId }) {
   };
 
   return (
-    <Card className="flex h-full flex-col border-border/60 overflow-hidden">
-      <CardHeader className="shrink-0 border-b border-border/60 pb-4">
+    <Card className="flex h-full flex-col border border-border/80 bg-card shadow-sm overflow-hidden">
+      <CardHeader className="shrink-0 border-b border-border pb-4">
         <CardTitle className="flex items-center gap-2 text-lg">
           <MessageSquare className="size-5 text-violet-600 dark:text-violet-400" />
           Ask QuickTake
@@ -105,7 +106,7 @@ export function AnalysisCopilot({ analysisId }) {
             <div
               key={index}
               className={cn(
-                "flex w-full",
+                "flex w-full mb-3",
                 message.role === "user" ? "justify-end" : "justify-start"
               )}
             >
@@ -114,28 +115,40 @@ export function AnalysisCopilot({ analysisId }) {
                   "max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-xs",
                   message.role === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "border border-border/60 bg-muted/30 text-foreground"
+                    : "border border-border bg-muted/30 text-foreground"
                 )}
               >
                 {message.role === "user" ? (
                   <p className="whitespace-pre-wrap">{message.content}</p>
                 ) : (
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown
-                      components={{
-                        h1: ({ children }) => <h1 className="text-base font-bold mt-3 mb-1">{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-sm font-bold mt-3 mb-1">{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-sm font-semibold mt-2 mb-1">{children}</h3>,
-                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                        ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-0.5">{children}</ol>,
-                        li: ({ children }) => <li className="text-sm leading-relaxed">{children}</li>,
-                        p: ({ children }) => <p className="text-sm leading-relaxed mb-1">{children}</p>,
+                  <>
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown
+                        components={{
+                          h1: ({ children }) => <h1 className="text-base font-bold mt-3 mb-1">{children}</h1>,
+                          h2: ({ children }) => <h2 className="text-sm font-bold mt-3 mb-1">{children}</h2>,
+                          h3: ({ children }) => <h3 className="text-sm font-semibold mt-2 mb-1">{children}</h3>,
+                          strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                          ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5">{children}</ul>,
+                          ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-0.5">{children}</ol>,
+                          li: ({ children }) => <li className="text-sm leading-relaxed">{children}</li>,
+                          p: ({ children }) => <p className="text-sm leading-relaxed mb-1">{children}</p>,
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(message.content);
+                        toast.success("Copied to clipboard");
                       }}
+                      className="mt-2 flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {message.content}
-                    </ReactMarkdown>
-                  </div>
+                      <Copy className="size-3" />
+                      Copy
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -143,7 +156,7 @@ export function AnalysisCopilot({ analysisId }) {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-muted/30 px-3.5 py-2.5 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 rounded-2xl border border-border bg-muted/30 px-3.5 py-2.5 text-sm text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" />
                 QuickTake is thinking...
               </div>
@@ -152,7 +165,7 @@ export function AnalysisCopilot({ analysisId }) {
         </div>
       </CardContent>
 
-      <CardFooter className="shrink-0 border-t border-border/60 p-4">
+      <CardFooter className="shrink-0 border-t border-border p-4">
         <form onSubmit={onSubmit} className="flex w-full gap-2">
           <textarea
             value={question}
