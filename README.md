@@ -56,7 +56,7 @@ QuickTake was built to solve that problem.
 
 ## Core Features
 
-### 🎙 AI Transcription
+### AI Transcription
 
 Convert audio and video into searchable text using state-of-the-art speech recognition.
 
@@ -67,7 +67,7 @@ Convert audio and video into searchable text using state-of-the-art speech recog
 
 ---
 
-### 🧠 Intelligent Summaries
+### Intelligent Summaries
 
 Generate concise summaries that capture the essence of long discussions.
 
@@ -80,7 +80,7 @@ Reading Time: < 2 Minutes
 
 ---
 
-### 📌 Key Insights Extraction
+### Key Insights Extraction
 
 Automatically identify:
 
@@ -91,7 +91,7 @@ Automatically identify:
 
 ---
 
-### ✅ Action Item Detection
+### Action Item Detection
 
 QuickTake detects actionable tasks from conversations.
 
@@ -106,7 +106,7 @@ Example:
 
 ---
 
-### 💬 AI Copilot
+### AI Copilot
 
 Ask questions directly about the content.
 
@@ -126,7 +126,7 @@ The AI responds using the transcript generated from the uploaded content.
 
 ---
 
-### 📺 YouTube Intelligence
+### YouTube Intelligence
 
 Analyze YouTube videos without watching them entirely.
 
@@ -142,7 +142,7 @@ Get:
 
 ---
 
-### 🔐 Secure Authentication
+### Secure Authentication
 
 Built-in authentication system with:
 
@@ -153,7 +153,7 @@ Built-in authentication system with:
 
 ---
 
-### 📊 Analytics Dashboard
+### Analytics Dashboard
 
 Track:
 
@@ -165,7 +165,7 @@ Track:
 
 ---
 
-### 🌐 Public Sharing
+### Public Sharing
 
 Generate shareable links for analyses and summaries.
 
