@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, MessageSquare, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -116,7 +117,26 @@ export function AnalysisCopilot({ analysisId }) {
                     : "border border-border/60 bg-muted/30 text-foreground"
                 )}
               >
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                {message.role === "user" ? (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                ) : (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        h1: ({ children }) => <h1 className="text-base font-bold mt-3 mb-1">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-sm font-bold mt-3 mb-1">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-sm font-semibold mt-2 mb-1">{children}</h3>,
+                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-0.5">{children}</ol>,
+                        li: ({ children }) => <li className="text-sm leading-relaxed">{children}</li>,
+                        p: ({ children }) => <p className="text-sm leading-relaxed mb-1">{children}</p>,
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
+                )}
               </div>
             </div>
           ))}

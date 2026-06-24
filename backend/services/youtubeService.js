@@ -1,43 +1,33 @@
-import ytDlp from "yt-dlp-exec";
-import fs from "fs";
+import { YoutubeTranscript } from "youtube-transcript";
+
+function extractVideoId(url) {
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  if (!match) throw new Error("Invalid YouTube URL");
+  return match[1];
+}
 
 export async function downloadYoutubeAudio(url) {
-  // First fetch metadata to get duration. Support multiple metadata shapes.
-  let durationSeconds = 0;
-  try {
-    const info = await ytDlp(url, { dumpSingleJson: true, jsRuntimes: "node" , cookies: "./cookies.txt" });
-    if (info) {
-      // common fields: duration, duration_seconds, or entries[0].duration
-      if (typeof info.duration !== "undefined") {
-        durationSeconds = Math.round(Number(info.duration) || 0);
-      } else if (typeof info.duration_seconds !== "undefined") {
-        durationSeconds = Math.round(Number(info.duration_seconds) || 0);
-      } else if (Array.isArray(info.entries) && info.entries[0] && typeof info.entries[0].duration !== "undefined") {
-        durationSeconds = Math.round(Number(info.entries[0].duration) || 0);
-      }
-    }
-  } catch (err) {
-    console.warn("Failed to fetch youtube metadata:", err);
+  const videoId = extractVideoId(url);
+  const items = await YoutubeTranscript.fetchTranscript(videoId);
+
+  if (!items || items.length === 0) {
+    throw new Error("No captions available for this video");
   }
 
-  const output = `temp-${Date.now()}.mp3`;
+  const transcriptText = items
+    .map((item) => item.text)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  await ytDlp(url, {
-    extractAudio: true,
-    audioFormat: "mp3",
-    output,
-    jsRuntimes: "node",
-    cookies: "./cookies.txt",
-  });
-
-  const buffer = fs.readFileSync(output);
-
-  fs.unlinkSync(output);
+  const last = items[items.length - 1];
+  const durationSeconds = Math.round((last.offset + last.duration) / 1000);
 
   return {
-    buffer,
-    filename: output,
-    mimetype: "audio/mpeg",
+    type: "transcript",
+    transcriptText,
     durationSeconds,
   };
 }
