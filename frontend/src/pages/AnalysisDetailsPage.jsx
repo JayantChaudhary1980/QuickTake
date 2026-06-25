@@ -422,7 +422,7 @@ function AnalysisDetailsPage() {
 
                   <div>
                     <p className="text-sm font-medium text-red-400">
-                      Analysis Failed
+                      Analysis Failed - Dont worry, this issue has been forward to the developer. It will be resolved soon. Please try after sometime.
                     </p>
 
                     <p className="text-xs text-muted-foreground">
