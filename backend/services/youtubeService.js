@@ -1,62 +1,40 @@
 import ytDlp from "yt-dlp-exec";
 import fs from "fs";
-import path from "path";
-import { execSync } from "child_process";
 
 export async function downloadYoutubeAudio(url) {
+  // First fetch metadata to get duration. Support multiple metadata shapes.
   let durationSeconds = 0;
-
-  // Update yt-dlp to latest version
   try {
-    execSync(
-      "/opt/render/project/src/backend/node_modules/yt-dlp-exec/bin/yt-dlp -U",
-      { stdio: "ignore" }
-    );
-    console.log("yt-dlp updated successfully");
-  } catch (e) {
-    console.warn("yt-dlp update failed:", e.message);
-  }
-
-  // Write cookies from env var to a temp file
-  const cookiesBase64 = process.env.YOUTUBE_COOKIES_BASE64;
-  const cookiesPath = path.join("/tmp", "cookies.txt");
-  if (cookiesBase64) {
-    fs.writeFileSync(
-      cookiesPath,
-      Buffer.from(cookiesBase64, "base64").toString("utf-8")
-    );
-  }
-
-  // Fetch metadata
-  try {
-    const info = await ytDlp(url, {
-      dumpSingleJson: true,
-      noCheckCertificates: true,
-      noWarnings: true,
-      cookies: cookiesPath,
-    });
-    durationSeconds = Math.round(Number(info?.duration) || 0);
+    const info = await ytDlp(url, { dumpSingleJson: true, jsRuntimes: "node" , cookies: "./cookies.txt" });
+    if (info) {
+      // common fields: duration, duration_seconds, or entries[0].duration
+      if (typeof info.duration !== "undefined") {
+        durationSeconds = Math.round(Number(info.duration) || 0);
+      } else if (typeof info.duration_seconds !== "undefined") {
+        durationSeconds = Math.round(Number(info.duration_seconds) || 0);
+      } else if (Array.isArray(info.entries) && info.entries[0] && typeof info.entries[0].duration !== "undefined") {
+        durationSeconds = Math.round(Number(info.entries[0].duration) || 0);
+      }
+    }
   } catch (err) {
-    console.warn("Failed to fetch metadata:", err.message);
+    console.warn("Failed to fetch youtube metadata:", err);
   }
 
-  // Download audio
-  const output = `/tmp/temp-${Date.now()}.mp3`;
+  const output = `temp-${Date.now()}.mp3`;
+
   await ytDlp(url, {
     extractAudio: true,
     audioFormat: "mp3",
     output,
-    cookies: cookiesPath,
-    noCheckCertificates: true,
-    noWarnings: true,
-    format: "bestaudio/best",
+    jsRuntimes: "node",
+    cookies: "./cookies.txt",
   });
 
   const buffer = fs.readFileSync(output);
+
   fs.unlinkSync(output);
 
   return {
-    type: "audio",
     buffer,
     filename: output,
     mimetype: "audio/mpeg",
