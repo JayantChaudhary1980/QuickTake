@@ -393,21 +393,15 @@ export const createYoutubeAnalysis = async (req, res) => {
     // Continue processing in background and update statusMessage along the way.
     (async () => {
       try {
-        await Analysis.findByIdAndUpdate(placeholder._id, { statusMessage: "Fetching captions..." });
+        await Analysis.findByIdAndUpdate(placeholder._id, { statusMessage: "Fetching audio..." });
         const result = await downloadYoutubeAudio(url);
         const durationSeconds = Number(result?.durationSeconds) || 0;
 
-        let transcript;
-        if (result.type === "audio") {
-          await Analysis.findByIdAndUpdate(placeholder._id, { durationSeconds, statusMessage: "Transcribing audio..." });
-          transcript = await transcribeAudio(result.buffer, result.filename, result.mimetype, {
-            userId: req.user.userId,
-            analysisId: placeholder._id,
-          });
-        } else {
-          transcript = result.transcriptText;
-          await Analysis.findByIdAndUpdate(placeholder._id, { durationSeconds });
-        }
+        await Analysis.findByIdAndUpdate(placeholder._id, { durationSeconds, statusMessage: "Transcribing..." });
+        const transcript = await transcribeAudio(result.buffer, result.filename, result.mimetype, {
+          userId: req.user.userId,
+          analysisId: placeholder._id,
+        });
 
         // Generating summary
         await Analysis.findByIdAndUpdate(placeholder._id, { statusMessage: "Generating summary..." });

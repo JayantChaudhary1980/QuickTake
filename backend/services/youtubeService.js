@@ -1,67 +1,47 @@
-import { YoutubeTranscript } from "youtube-transcript";
 import ytDlp from "yt-dlp-exec";
 import fs from "fs";
+import path from "path";
 
-function extractVideoId(url) {
-  const match = url.match(
-    /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  if (!match) throw new Error("Invalid YouTube URL");
-  return match[1];
-}
+export async function downloadYoutubeAudio(url) {
+  let durationSeconds = 0;
 
-// Method 1: youtube-transcript (captions)
-async function tryYoutubeTranscript(url) {
-  const videoId = extractVideoId(url);
-  const items = await YoutubeTranscript.fetchTranscript(videoId);
-
-  if (!items || items.length === 0) {
-    throw new Error("No captions available");
+  // Writing cookies from env var to a temp file
+  const cookiesBase64 = process.env.YOUTUBE_COOKIES_BASE64;
+  const cookiesPath = path.join("/tmp", "cookies.txt");
+  if (cookiesBase64) {
+    fs.writeFileSync(cookiesPath, Buffer.from(cookiesBase64, "base64").toString("utf-8"));
   }
 
-  const transcriptText = items
-    .map((item) => item.text)
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const last = items[items.length - 1];
-  const durationSeconds = Math.round((last.offset + last.duration) / 1000);
-
-  return { type: "transcript", transcriptText, durationSeconds };
-}
-
-// Method 2: yt-dlp with cookies
-async function tryYtDlp(url) {
-  let durationSeconds = 0;
   try {
-    const info = await ytDlp(url, { dumpSingleJson: true, cookies: "./cookies.txt" });
+    const info = await ytDlp(url, {
+      dumpSingleJson: true,
+      noCheckCertificates: true,
+      noWarnings: true,
+      cookies: cookiesPath,
+    });
     durationSeconds = Math.round(Number(info?.duration) || 0);
   } catch (err) {
     console.warn("Failed to fetch metadata:", err.message);
   }
 
-  const output = `temp-${Date.now()}.mp3`;
+  const output = `/tmp/temp-${Date.now()}.mp3`;
   await ytDlp(url, {
     extractAudio: true,
     audioFormat: "mp3",
     output,
-    cookies: "./cookies.txt",
+    cookies: cookiesPath,
+    noCheckCertificates: true,
+    noWarnings: true,
   });
 
   const buffer = fs.readFileSync(output);
   fs.unlinkSync(output);
 
-  return { type: "audio", buffer, filename: output, mimetype: "audio/mpeg", durationSeconds };
-}
-
-// Main export: captions first, cookies fallback
-export async function downloadYoutubeAudio(url) {
-  try {
-    console.log("Trying youtube-transcript...");
-    return await tryYoutubeTranscript(url);
-  } catch (err) {
-    console.warn("youtube-transcript failed, falling back to yt-dlp:", err.message);
-    return await tryYtDlp(url);
-  }
+  return {
+    type: "audio",
+    buffer,
+    filename: output,
+    mimetype: "audio/mpeg",
+    durationSeconds,
+  };
 }
